@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>指针式仪表读数检测识别系统</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<!-- Chart.js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f0f4f8;--panel:#fff;--card:#f8fafc;--inp:#f1f5f9;
+  --bd:#e2e8f0;--bd2:#bfdbfe;
+  --a:#2563eb;--a2:#059669;--a3:#ea580c;
+  --warn:#d97706;--danger:#dc2626;--hist:#7c3aed;
+  --text:#1e293b;--muted:#64748b;--dim:#cbd5e1;
+  --fd:'Orbitron',monospace;--fb:'Noto Sans SC',sans-serif;--fm:'JetBrains Mono',monospace;
+  --r:8px;--rl:14px;
+  --sh:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --sh2:0 4px 24px rgba(37,99,235,.12);
+  --ease:.2s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── Header ── */
+.hdr{display:flex;align-items:center;justify-content:center;padding:13px 28px;
+  border-bottom:1px solid var(--bd);background:#fff;
+  box-shadow:0 1px 0 var(--bd),0 2px 8px rgba(0,0,0,.04);
+  position:sticky;top:0;z-index:20;}
+.hdr-l,.hdr-r{position:absolute;display:flex;align-items:center;gap:8px;}
+.hdr-l{left:20px;}.hdr-r{right:20px;}
+.hdr-title{font-family:var(--fd);font-size:clamp(12px,1.5vw,19px);font-weight:600;
+  letter-spacing:.1em;color:var(--a);text-transform:uppercase;}
+.hdr-title span{color:var(--text);font-weight:400;}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--a2);flex-shrink:0;animation:pd 2.5s ease-in-out infinite;}
+@keyframes pd{0%,100%{opacity:1}50%{opacity:.35}}
+.sys-time{font-family:var(--fm);font-size:11px;color:var(--muted);}
+.uinfo{display:flex;align-items:center;gap:8px;}
+.uavt{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--a),#60a5fa);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0;}
+.uname{font-family:var(--fm);font-size:12px;color:var(--text);}
+.ulvl{font-size:10px;padding:2px 7px;border-radius:10px;background:#eff6ff;
+  color:var(--a);border:1px solid #bfdbfe;font-family:var(--fm);}
+.logout-btn{padding:4px 11px;border:1px solid var(--bd);border-radius:6px;background:transparent;
+  color:var(--muted);font-size:12px;cursor:pointer;transition:all var(--ease);font-family:var(--fb);}
+.logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+/* ── 三栏 ── */
+.ws{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:14px;padding:14px 18px 18px;}
+
+/* ── 卡片 ── */
+.panel{background:var(--panel);border:1px solid var(--bd);border-radius:var(--rl);
+  display:flex;flex-direction:column;box-shadow:var(--sh);overflow:hidden;transition:box-shadow var(--ease);}
+.panel:hover{box-shadow:var(--sh2);}
+.ph{padding:10px 14px 9px;border-bottom:1px solid var(--bd);background:var(--card);
+  display:flex;align-items:center;justify-content:space-between;}
+.ph-title{font-family:var(--fd);font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
+.ps{padding:11px 14px;border-bottom:1px solid var(--bd);}
+.ps:last-child{border-bottom:none;}
+.pl{font-family:var(--fm);font-size:10px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;
+  margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+.pl::before{content:'';display:block;width:3px;height:10px;border-radius:2px;background:var(--a);}
+
+/* ── 图片框 ── */
+.ib{width:100%;aspect-ratio:1;background:var(--inp);border-radius:var(--r);border:1.5px dashed var(--bd);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;
+  transition:border-color var(--ease),background var(--ease);cursor:pointer;}
+.ib:hover{border-color:var(--a);background:#eff6ff;}
+.ib img{width:100%;height:100%;object-fit:contain;display:none;border-radius:6px;}
+.ib img.loaded{display:block;}
+.iph{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--dim);user-select:none;}
+.iph-icon{font-size:22px;transition:color var(--ease);}
+.ib:hover .iph-icon{color:var(--a);}
+.iph-text{font-family:var(--fm);font-size:10px;letter-spacing:.06em;}
+.il{position:absolute;inset:0;background:rgba(240,244,248,.85);display:none;align-items:center;justify-content:center;}
+.il.on{display:flex;}
+.spin{width:22px;height:22px;border:2px solid var(--bd);border-top-color:var(--a);border-radius:50%;animation:sp .7s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ib.drag-over{border-color:var(--a);background:#eff6ff;}
+.up-hint{font-size:10px;color:var(--dim);font-family:var(--fm);text-align:center;margin-top:4px;}
+
+/* ── 按钮 ── */
+.btn{width:100%;padding:10px 16px;border:1.5px solid var(--bd);border-radius:var(--r);
+  background:var(--card);color:var(--text);font-family:var(--fm);font-size:13px;font-weight:500;
+  letter-spacing:.04em;cursor:pointer;transition:all var(--ease);
+  display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn:hover{border-color:var(--a);color:var(--a);box-shadow:0 0 0 3px rgba(37,99,235,.1);transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-p{background:var(--a);border-color:var(--a);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.25);}
+.btn-p:hover{background:#1d4ed8;border-color:#1d4ed8;color:#fff;box-shadow:0 4px 16px rgba(37,99,235,.35);}
+.btn-p2{background:#fff;border-color:var(--a);color:var(--a);}
+.btn-p2:hover{background:#eff6ff;}
+.btn-s{border-color:var(--a2);color:var(--a2);}
+.btn-s:hover{background:#f0fdf4;box-shadow:0 0 0 3px rgba(5,150,105,.1);}
+.btn-w{border-color:var(--warn);color:var(--warn);}
+.btn-w:hover{background:#fffbeb;box-shadow:0 0 0 3px rgba(217,119,6,.1);}
+.btn-d{border-color:var(--danger);color:var(--danger);}
+.btn-d:hover{background:#fef2f2;box-shadow:0 0 0 3px rgba(220,38,38,.1);}
+.btn-h{border-color:var(--hist);color:var(--hist);}
+.btn-h:hover{background:#f5f3ff;box-shadow:0 0 0 3px rgba(124,58,237,.1);}
+.bi{font-size:14px;}
+
+/* ── 步진 ── */
+.steps{display:flex;gap:4px;}
+.step{flex:1;height:4px;border-radius:2px;background:var(--bd);transition:background .4s;}
+.step.done{background:var(--a2);}
+.step.active{background:var(--a);animation:sa 1s ease-in-out infinite;}
+@keyframes sa{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── 数值卡片 ── */
+.vc{background:var(--inp);border:1.5px solid var(--bd);border-radius:var(--r);padding:10px 13px;display:flex;flex-direction:column;gap:3px;}
+.vcl{font-family:var(--fm);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.vcn{font-family:var(--fd);font-size:clamp(13px,1.5vw,18px);font-weight:600;color:var(--dim);letter-spacing:.04em;transition:color .4s;}
+.vcn.v{color:var(--a2);}.vcn.v.b{color:var(--a);}
+.vrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+/* ── 徽章 ── */
+.tbadge{font-family:var(--fm);font-size:11px;color:var(--muted);background:var(--inp);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:6px;min-height:31px;}
+.tdot{width:6px;height:6px;border-radius:50%;background:var(--dim);flex-shrink:0;}
+.tbadge.on .tdot{background:var(--a2);}
+.sbadge{font-family:var(--fm);font-size:12px;color:var(--a3);background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:6px;min-height:31px;}
+.tid-badge{font-family:var(--fm);font-size:11px;color:var(--a);background:var(--inp);border:1px solid var(--bd2);border-radius:6px;padding:6px 10px;display:flex;align-items:center;gap:6px;min-height:31px;transition:border-color var(--ease);}
+
+/* ── 日志区 ── */
+.log{width:100%;background:var(--inp);border:1.5px solid var(--bd);border-radius:var(--r);
+  padding:10px 12px;font-family:var(--fm);font-size:11.5px;line-height:1.8;
+  color:var(--muted);overflow-y:auto;height:130px;}
+.log-s{color:var(--a2);}.log-e{color:var(--danger);}.log-i{color:var(--a);}
+
+/* ── 状态标签 ── */
+.stag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;
+  font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;}
+.stag.idle{background:#f1f5f9;color:var(--muted);border:1px solid var(--bd);}
+.stag.running{background:#eff6ff;color:var(--a);border:1px solid #bfdbfe;}
+.stag.done{background:#f0fdf4;color:var(--a2);border:1px solid #a7f3d0;}
+.stag.error{background:#fef2f2;color:var(--danger);border:1px solid #fecaca;}
+
+/* ══════════════════════════════════════════════
+   历史折线图区域
+══════════════════════════════════════════════ */
+.chart-section{
+  padding:12px 14px;
+  border-bottom:1px solid var(--bd);
+  display:flex;flex-direction:column;gap:10px;
+}
+
+/* 标题栏 + 控制按钮行 */
+.chart-header{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+.chart-serial-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--fm);font-size:11px;
+  color:var(--a);background:#eff6ff;
+  border:1px solid #bfdbfe;border-radius:6px;
+  padding:4px 10px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.chart-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+
+/* 小型切换按钮 */
+.ctag{
+  padding:4px 10px;border-radius:20px;border:1.5px solid var(--bd);
+  background:var(--card);color:var(--muted);
+  font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.04em;
+  cursor:pointer;transition:all var(--ease);white-space:nowrap;
+}
+.ctag:hover{border-color:var(--a);color:var(--a);}
+.ctag.on-a{border-color:var(--a);background:#eff6ff;color:var(--a);}
+.ctag.on-g{border-color:var(--a2);background:#f0fdf4;color:var(--a2);}
+.ctag.on-o{border-color:var(--a3);background:#fff7ed;color:var(--a3);}
+
+/* 条数选择器 */
+.limit-sel{
+  padding:4px 8px;border:1.5px solid var(--bd);border-radius:6px;
+  background:var(--card);color:var(--muted);font-family:var(--fm);font-size:11px;
+  outline:none;cursor:pointer;transition:border-color var(--ease);
+}
+.limit-sel:focus{border-color:var(--a);}
+
+/* 刷新按钮 */
+.refresh-btn{
+  padding:4px 10px;border:1.5px solid var(--bd);border-radius:6px;
+  background:var(--card);color:var(--muted);font-size:13px;
+  cursor:pointer;transition:all var(--ease);display:flex;align-items:center;
+}
+.refresh-btn:hover{border-color:var(--a);color:var(--a);transform:rotate(30deg);}
+
+/* Chart 画布容器 */
+.chart-wrap{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--bd);
+  border-radius:var(--r);
+  overflow:hidden;
+  height:220px;   /* 固定高度，不拉伸卡片 */
+}
+.chart-wrap canvas{display:block;}
+
+/* 空状态 */
+.chart-empty{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:8px;color:var(--muted);
+  font-family:var(--fm);font-size:12px;
+  letter-spacing:.04em;
+  background:var(--card);
+  pointer-events:none;
+  transition:opacity .3s;
+}
+.chart-empty .ce-icon{font-size:28px;opacity:.4;}
+.chart-empty.hidden{opacity:0;}
+
+/* 图表加载spinner */
+.chart-loading{
+  position:absolute;inset:0;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(248,250,252,.85);border-radius:var(--r);
+  z-index:5;
+}
+.chart-loading.on{display:flex;}
+
+/* 悬停信息气泡（Chart.js 自带 tooltip 已足够，此为辅助统计行） */
+.chart-stats{
+  display:flex;gap:10px;flex-wrap:wrap;
+}
+.chart-stat{
+  flex:1;min-width:60px;
+  background:var(--inp);border:1px solid var(--bd);border-radius:6px;
+  padding:6px 10px;display:flex;flex-direction:column;gap:2px;
+}
+.cs-label{font-family:var(--fm);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.cs-val{font-family:var(--fd);font-size:13px;font-weight:600;color:var(--dim);transition:color .4s;}
+.cs-val.a{color:var(--a);}
+.cs-val.g{color:var(--a2);}
+.cs-val.o{color:var(--a3);}
+
+/* ── 弹窗 ── */
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.4);backdrop-filter:blur(4px);
+  z-index:100;display:none;align-items:center;justify-content:center;animation:fi .2s ease;}
+.overlay.on{display:flex;}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border:1px solid var(--bd);border-radius:var(--rl);padding:26px 30px;
+  width:min(420px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.14);animation:su .25s cubic-bezier(.4,0,.2,1);}
+@keyframes su{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-family:var(--fd);font-size:13px;letter-spacing:.1em;color:var(--a);margin-bottom:16px;text-transform:uppercase;}
+.modal-input{width:100%;background:var(--inp);border:1.5px solid var(--bd);border-radius:var(--r);padding:12px 14px;color:var(--text);font-family:var(--fd);font-size:18px;letter-spacing:.06em;outline:none;text-align:center;transition:border-color var(--ease),box-shadow var(--ease);margin-bottom:16px;}
+.modal-input:focus{border-color:var(--a);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+.modal-actions{display:flex;gap:10px;}
+
+/* 历史弹窗 */
+.hist-modal{width:min(720px,95vw);max-height:85vh;display:flex;flex-direction:column;}
+.hist-body{flex:1;overflow-y:auto;margin-top:8px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{background:var(--inp);color:var(--muted);font-weight:500;padding:8px 10px;text-align:left;font-family:var(--fm);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--bd);}
+td{padding:9px 10px;border-bottom:1px solid var(--bd);color:var(--text);font-family:var(--fm);font-size:11.5px;}
+tr:hover td{background:#f8fafc;}
+.bs{display:inline-flex;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500;}
+.bs-ok{background:#f0fdf4;color:var(--a2);}
+.bs-fail{background:#fef2f2;color:var(--danger);}
+.bs-pend{background:#f1f5f9;color:var(--muted);}
+.hist-empty{text-align:center;padding:32px;color:var(--muted);font-size:13px;}
+.hist-pager{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--muted);}
+
+@media(max-width:1100px){.ws{grid-template-columns:1fr 1fr;}.panel:last-child{grid-column:1/-1;}}
+@media(max-width:700px){.ws{grid-template-columns:1fr;}.panel:last-child{grid-column:1;}}
+
+/* ══════════════════════════════════════════════
+   摄像头弹窗
+══════════════════════════════════════════════ */
+.cam-modal{
+  width:min(520px,96vw);
+  background:#fff;border:1px solid var(--bd);border-radius:var(--rl);
+  padding:20px 22px 18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.18);
+  animation:su .25s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;gap:12px;
+}
+/* 取景器容器 */
+.cam-viewport{
+  position:relative;width:100%;aspect-ratio:4/3;
+  background:#111;border-radius:10px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+#camVideo{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:block;transition:opacity .2s;
+}
+#camVideo.hide{opacity:0;pointer-events:none;}
+#camPreview{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:contain;display:none;
+}
+#camPreview.show{display:block;}
+/* 闪光层 */
+#camFlash{
+  position:absolute;inset:0;background:#fff;
+  opacity:0;pointer-events:none;border-radius:10px;
+  transition:none;
+}
+#camFlash.flash{animation:camfl .35s ease-out forwards;}
+@keyframes camfl{0%{opacity:.9}100%{opacity:0}}
+/* 对焦十字 */
+#camCrosshair{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.cam-cross{width:48px;height:48px;border-radius:4px;position:relative;}
+.cam-cross::before,.cam-cross::after{
+  content:'';position:absolute;background:rgba(255,255,255,.8);
+}
+.cam-cross::before{width:100%;height:1.5px;top:50%;left:0;transform:translateY(-50%);}
+.cam-cross::after{width:1.5px;height:100%;left:50%;top:0;transform:translateX(-50%);}
+/* 提示文字 */
+#camHint{
+  position:absolute;bottom:8px;left:0;right:0;text-align:center;
+  font-family:var(--fm);font-size:11px;color:rgba(255,255,255,.7);
+  pointer-events:none;
+}
+/* 错误条 */
+#camError{
+  display:none;padding:8px 12px;border-radius:6px;
+  background:#fef2f2;border:1px solid #fecaca;
+  color:var(--danger);font-family:var(--fm);font-size:12px;
+  line-height:1.5;
+}
+#camError.show{display:block;}
+/* 底部控制行 */
+.cam-controls{
+  display:grid;grid-template-columns:1fr auto 1fr;
+  align-items:center;gap:10px;
+}
+.cam-side{display:flex;gap:8px;}
+#camSwitchBtn{
+  padding:7px 14px;border:1.5px solid var(--bd);border-radius:8px;
+  background:var(--card);color:var(--muted);font-size:18px;
+  cursor:pointer;transition:all var(--ease);
+}
+#camSwitchBtn:hover:not(:disabled){border-color:var(--a);color:var(--a);}
+#camSwitchBtn:disabled{opacity:.35;cursor:default;}
+/* 快门按钮 */
+#camShutter{
+  width:64px;height:64px;border-radius:50%;
+  background:var(--a);border:3px solid #fff;
+  box-shadow:0 0 0 3px var(--a);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all var(--ease);font-size:22px;color:#fff;
+  flex-shrink:0;
+}
+#camShutter:hover{background:#1d4ed8;box-shadow:0 0 0 3px #1d4ed8;transform:scale(1.06);}
+#camShutter:active{transform:scale(.96);}
+/* 确认/取消按钮（拍摄后） */
+#camConfirmBtn{
+  display:none;flex:1;
+  padding:10px;border:1.5px solid var(--a2);border-radius:8px;
+  background:#f0fdf4;color:var(--a2);
+  font-family:var(--fm);font-size:13px;cursor:pointer;
+  transition:all var(--ease);
+}
+#camConfirmBtn.show{display:block;}
+#camConfirmBtn:hover:not(:disabled){background:#dcfce7;}
+#camConfirmBtn:disabled{opacity:.5;cursor:default;}
+.cam-close-btn{
+  padding:7px 16px;border:1.5px solid var(--bd);border-radius:8px;
+  background:var(--card);color:var(--muted);font-family:var(--fm);font-size:12px;
+  cursor:pointer;transition:all var(--ease);white-space:nowrap;
+}
+.cam-close-btn:hover{border-color:var(--danger);color:var(--danger);}
+</style>
+</head>
+<body>
+
+<!-- ═══ Header ═══ -->
+<header class="hdr">
+  <div class="hdr-l">
+    <div class="sdot" id="gDot"></div>
+    <span style="font-family:var(--fm);font-size:11px;color:var(--muted)">BISHE·SYS</span>
+  </div>
+  <h1 class="hdr-title">指针式仪表<span> 读数检测识别系统</span></h1>
+  <div class="hdr-r">
+    <span class="sys-time" id="sysT"></span>
+    <div class="uinfo">
+      <div class="uavt" id="uAvt">A</div>
+      <span class="uname" id="uName">{{ username }}</span>
+      <span class="ulvl">{{ user_level }}</span>
+      <a href="/logout"><button class="logout-btn">退出</button></a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ 工作区 ═══ -->
+<main class="ws">
+
+  <!-- ▌左栏▌ -->
+  <section class="panel">
+    <div class="ph">
+      <span class="ph-title">图像输入</span>
+      <span class="stag idle" id="taskStatus">待机</span>
+    </div>
+    <div class="ps">
+      <div class="pl">原始图片</div>
+      <div class="ib" id="dropZone" title="点击选择或拖拽图片">
+        <div class="iph" id="ph1"><div class="iph-icon">⊕</div><div class="iph-text">CLICK / DROP</div></div>
+        <img id="imgOrig" alt="原始图片"/>
+        <div class="il" id="ldOrig"><div class="spin"></div></div>
+      </div>
+      <div class="up-hint">支持 JPG / PNG / BMP，点击或拖拽</div>
+      <input type="file" id="fileInput" accept="image/*" style="display:none"/>
+    </div>
+    <div class="ps">
+      <div class="pl">裁剪表盘（无标签）</div>
+      <div class="ib">
+        <div class="iph"><div class="iph-icon">◎</div><div class="iph-text">STEP 2</div></div>
+        <img id="imgDial" alt="表盘"/>
+        <div class="il" id="ldDial"><div class="spin"></div></div>
+      </div>
+    </div>
+    <!-- <div class="ps">
+      <div class="pl">当前任务编号</div>
+      <div class="tid-badge" id="tidBadge"><span>🗂</span><span id="tidText">——</span></div>
+    </div> -->
+    <div class="ps" style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn btn-p" onclick="triggerUpload()"><span class="bi">📁</span> 导入图片</button>
+      <button class="btn btn-p2" onclick="openCamera()"><span class="bi">📸</span> 实时拍摄</button>
+      <button class="btn" id="btnDetect" disabled onclick="startDetect()"><span class="bi">▶</span> 开始检测</button>
+    </div>
+  </section>
+
+  <!-- ▌中栏▌ -->
+  <section class="panel">
+    <div class="ph"><span class="ph-title">检测过程</span></div>
+    <div class="ps">
+      <div class="pl">仪表盘（带标签）</div>
+      <div class="ib">
+        <div class="iph"><div class="iph-icon">⊞</div><div class="iph-text">STEP 1</div></div>
+        <img id="imgObb" alt="带标签"/>
+        <div class="il" id="ldObb"><div class="spin"></div></div>
+      </div>
+    </div>
+    <div class="ps">
+      <div class="pl">圆心拟合结果</div>
+      <div class="ib">
+        <div class="iph"><div class="iph-icon">⊛</div><div class="iph-text">STEP 5</div></div>
+        <img id="imgFit" alt="拟合"/>
+        <div class="il" id="ldFit"><div class="spin"></div></div>
+      </div>
+    </div>
+
+    <div class="ps">
+      <div class="pl">当前任务编号</div>
+      <div class="tid-badge" id="tidBadge"><span>🗂</span><span id="tidText">——</span></div>
+    </div>
+
+    <div class="ps">
+      <div class="pl">检测进度</div>
+      <div class="steps">
+        <div class="step" id="s1" title="仪表盘裁剪"></div>
+        <div class="step" id="s2" title="表盘裁剪"></div>
+        <div class="step" id="s3" title="标签裁剪"></div>
+        <div class="step" id="s4" title="序号识别"></div>
+        <div class="step" id="s5" title="读数计算"></div>
+      </div>
+    </div>
+    <div class="ps" style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn btn-s" onclick="doConfirm()"><span class="bi">✓</span> 确认读数（入库）</button>
+      <button class="btn btn-w" onclick="openModify()"><span class="bi">✎</span> 修改读数（入库）</button>
+    </div>
+  </section>
+
+  <!-- ▌右栏▌ -->
+  <section class="panel" style="min-width:0">
+    <div class="ph"><span class="ph-title">检测结果</span></div>
+
+    <!-- 时间 & 序号 -->
+    <div class="ps" style="display:flex;flex-direction:column;gap:7px;">
+      <div class="pl">检测时间 / 表计序号</div>
+      <div class="tbadge" id="dtBadge"><div class="tdot"></div><span id="dtText">——</span></div>
+      <div class="sbadge"><span>◈</span><span id="snText">表计序号待获取</span></div>
+    </div>
+
+    <!-- 读数 -->
+    <div class="ps">
+      <div class="pl">读数结果</div>
+      <div class="vrow">
+        <div class="vc"><div class="vcl">修正前读数</div><div class="vcn b" id="valB">—.——</div></div>
+        <div class="vc"><div class="vcl">修正后读数</div><div class="vcn"  id="valA">—.——</div></div>
+      </div>
+    </div>
+
+    <!-- 读数日志 -->
+    <div class="ps" style="display:flex;flex-direction:column;gap:6px;">
+      <div class="pl" style="margin-bottom:0">
+        读数日志
+        <span id="logUpd" style="margin-left:auto;font-family:var(--fm);font-size:9px;color:var(--dim);"></span>
+      </div>
+      <div class="log" id="logArea"></div>
+    </div>
+
+    <!-- ════ 历史数据折线图 ════ -->
+    <div class="chart-section">
+      <!-- 标题行 -->
+      <div class="chart-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="pl" style="margin-bottom:0">历史数据</div>
+          <div class="chart-serial-tag" id="chartSerialTag" title="">
+            <span>📍</span><span id="chartSerialText">请先完成检测</span>
+          </div>
+        </div>
+        <div class="chart-controls">
+          <!-- 数据系列切换 -->
+          <button class="ctag on-a" id="togBefore" onclick="toggleSeries('before')">修正前</button>
+          <button class="ctag on-g" id="togAfter"  onclick="toggleSeries('after')">修正后</button>
+          <!-- 条数选择 -->
+          <select class="limit-sel" id="limitSel" onchange="reloadChart()">
+            <option value="20">近20条</option>
+            <option value="40" selected>近40条</option>
+            <option value="60">近60条</option>
+            <option value="100">近100条</option>
+          </select>
+          <!-- 刷新 -->
+          <button class="refresh-btn" id="refreshBtn" onclick="reloadChart()" title="刷新图表">↻</button>
+        </div>
+      </div>
+
+      <!-- 画布 -->
+      <div class="chart-wrap">
+        <canvas id="histChart"></canvas>
+        <!-- 空态 -->
+        <div class="chart-empty" id="chartEmpty">
+          <div class="ce-icon">📈</div>
+          <div>检测完成后自动加载历史趋势</div>
+        </div>
+        <!-- 加载中 -->
+        <div class="chart-loading" id="chartLoading">
+          <div class="spin" style="width:26px;height:26px;border-width:3px;"></div>
+        </div>
+      </div>
+
+      <!-- 统计摘要行 -->
+      <div class="chart-stats">
+        <div class="chart-stat">
+          <div class="cs-label">数据点数</div>
+          <div class="cs-val a" id="csCount">—</div>
+        </div>
+        <div class="chart-stat">
+          <div class="cs-label">最新读数</div>
+          <div class="cs-val g" id="csLatest">—</div>
+        </div>
+        <div class="chart-stat">
+          <div class="cs-label">最大值</div>
+          <div class="cs-val o" id="csMax">—</div>
+        </div>
+        <div class="chart-stat">
+          <div class="cs-label">最小值</div>
+          <div class="cs-val" id="csMin">—</div>
+        </div>
+        <div class="chart-stat">
+          <div class="cs-label">波动范围</div>
+          <div class="cs-val" id="csRange">—</div>
+        </div>
+      </div>
+    </div>
+    <!-- ════ 历史数据折线图 END ════ -->
+
+    <!-- 操作按钮 -->
+    <div class="ps" style="display:flex;flex-direction:column;gap:7px;">
+      <button class="btn btn-d" onclick="doClear()"><span class="bi">⊘</span> 清除日志</button>
+      <button class="btn btn-h" onclick="openHistory()"><span class="bi">📊</span> 历史识别记录</button>
+    </div>
+  </section>
+</main>
+
+<!-- ═══ 修改读数弹窗 ═══ -->
+<div class="overlay" id="ovModify">
+  <div class="modal">
+    <div class="modal-title">✎ 修改读数</div>
+    <input class="modal-input" type="text" id="modInp" placeholder="输入修正后的值" inputmode="decimal"/>
+    <div class="modal-actions">
+      <button class="btn btn-s" style="flex:1" onclick="submitModify()">确认修改</button>
+      <button class="btn"       style="flex:1" onclick="closeModify()">取 消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 历史记录弹窗（表格） ═══ -->
+<div class="overlay" id="ovHistory">
+  <div class="modal hist-modal">
+    <div class="modal-title">📊 历史识别记录</div>
+    <div class="hist-body" id="histBody"><div class="hist-empty">加载中...</div></div>
+    <div class="hist-pager">
+      <span id="histInfo">—</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="width:auto;padding:5px 14px;font-size:12px;" onclick="histPage(-1)">上一页</button>
+        <button class="btn" style="width:auto;padding:5px 14px;font-size:12px;" onclick="histPage(1)">下一页</button>
+      </div>
+    </div>
+    <div style="margin-top:10px;"><button class="btn" onclick="closeHistory()">关 闭</button></div>
+  </div>
+</div>
+
+<!-- ═══ 摄像头拍摄弹窗 ═══ -->
+<div class="overlay" id="camOverlay">
+  <div class="cam-modal">
+
+    <!-- 标题 -->
+    <div class="modal-title" id="camTitle" style="margin-bottom:0;">📷 实时拍摄</div>
+
+    <!-- 取景器 -->
+    <div class="cam-viewport">
+      <video id="camVideo" autoplay playsinline muted></video>
+      <img  id="camPreview" alt="拍摄预览"/>
+      <canvas id="camCanvas" style="display:none;"></canvas>
+      <div id="camFlash"></div>
+      <div id="camCrosshair"><div class="cam-cross"></div></div>
+      <div id="camHint">摄像头初始化中...</div>
+    </div>
+
+    <!-- 错误提示 -->
+    <div id="camError"></div>
+
+    <!-- 底部控制：[切换] [快门] [取消] -->
+    <div class="cam-controls">
+      <div class="cam-side" style="justify-content:flex-start;">
+        <button id="camSwitchBtn" onclick="switchCamera()" title="切换前后摄像头">🔄</button>
+      </div>
+      <button id="camShutter" onclick="capturePhoto()" title="拍摄">⊙</button>
+      <div class="cam-side" style="justify-content:flex-end;">
+        <button id="camConfirmBtn" onclick="usePhoto()">✔ 使用此图片</button>
+        <button class="cam-close-btn" onclick="closeCamera()">取消</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  全局状态
+// ══════════════════════════════════════════════
+let curTaskId=null, pollT=null, logT=null, done=false;
+let histCurPage=1, histTotal=0;
+
+// 图表状态
+let histChart     = null;      // Chart.js 实例
+let chartSerial   = null;      // 当前图表对应的序号
+let showBefore    = true;      // 是否显示修正前
+let showAfter     = true;      // 是否显示修正后
+
+// ══════════════════════════════════════════════
+//  时钟
+// ══════════════════════════════════════════════
+function tick(){
+  const n=new Date(),p=x=>String(x).padStart(2,'0');
+  document.getElementById('sysT').textContent=
+    `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+}
+setInterval(tick,1000); tick();
+
+// 头像首字母
+(()=>{
+  const un=document.getElementById('uName').textContent||'U';
+  document.getElementById('uAvt').textContent=un.charAt(0).toUpperCase();
+})();
+
+// ══════════════════════════════════════════════
+//  图片上传
+// ══════════════════════════════════════════════
+function triggerUpload(){ document.getElementById('fileInput').click(); }
+document.getElementById('fileInput').addEventListener('change',e=>{ if(e.target.files[0])upload(e.target.files[0]); });
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files[0])upload(e.dataTransfer.files[0]);});
+dz.addEventListener('click',()=>{
+  // ★ 修复：摄像头弹窗打开期间屏蔽 dropZone 点击，防止误触发文件选择器
+  if(document.getElementById('camOverlay').classList.contains('on')) return;
+  if(!document.getElementById('imgOrig').classList.contains('loaded'))triggerUpload();
+});
+
+async function upload(file){
+  resetUI(); setStatus('idle','上传中...'); ld('ldOrig',1);
+  const fd=new FormData(); fd.append('file',file);
+  try{
+    const r=await fetch('/upload',{method:'POST',body:fd});
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    curTaskId=d.task_id;
+    showImg('imgOrig','ph1',d.image_url);
+    document.getElementById('btnDetect').disabled=false;
+    setStatus('idle','就绪');
+    appendLog(`📁 已导入：${d.filename}  [${d.task_id}]`);
+    document.getElementById('tidText').textContent=d.task_id;
+    document.getElementById('tidBadge').style.borderColor='var(--a)';
+  }catch(e){ appendLog(`❌ 上传失败：${e.message}`); setStatus('error','上传失败'); }
+  finally{ ld('ldOrig',0); }
+}
+
+// ══════════════════════════════════════════════
+//  检测
+// ══════════════════════════════════════════════
+async function startDetect(){
+  if(!curTaskId)return;
+  done=false; setStatus('running','检测中');
+  document.getElementById('btnDetect').disabled=true;
+  resetSteps(); setStep(1,'active');
+  ld('ldObb',1); ld('ldDial',1); ld('ldFit',1);
+  try{
+    const r=await fetch('/detect',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({task_id:curTaskId})});
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    clearInterval(pollT); pollT=setInterval(doPoll,1000);
+  }catch(e){ appendLog(`❌ ${e.message}`); setStatus('error','检测失败'); document.getElementById('btnDetect').disabled=false; }
+}
+
+async function doPoll(){
+  if(!curTaskId)return;
+  try{
+    const r=await fetch(`/poll/${curTaskId}`);
+    const d=await r.json();
+    // 更新日志
+    if(d.logs&&d.logs.length){
+      const le=document.getElementById('logArea');
+      le.innerHTML=d.logs.map(l=>{
+        if(l.startsWith('✔')||l.startsWith('📌'))return`<div class="log-s">${l}</div>`;
+        if(l.startsWith('❌'))return`<div class="log-e">${l}</div>`;
+        if(l.startsWith('▶')||l.startsWith('🚀'))return`<div class="log-i">${l}</div>`;
+        return`<div>${l}</div>`;
+      }).join(''); le.scrollTop=le.scrollHeight;
+    }
+    // 步进
+    if(d.logs){
+      const cnt=(d.logs.join('\n').match(/步骤 \d 完成/g)||[]).length;
+      for(let i=1;i<=5;i++){
+        if(i<=cnt)setStep(i,'done');
+        else if(i===cnt+1&&d.status==='running')setStep(i,'active');
+      }
+    }
+    // 图片
+    if(d.img_obb){ ld('ldObb',0); showImg('imgObb',null,d.img_obb+'?t='+Date.now()); }
+    if(d.img_dial){ ld('ldDial',0); showImg('imgDial',null,d.img_dial+'?t='+Date.now()); }
+    if(d.img_fitting){
+      const fitEl=document.getElementById('imgFit');
+      // ★ Fix: 只在图片尚未成功加载时才重新加载，避免中断重试
+      if(!fitEl.classList.contains('loaded')){
+        ld('ldFit',0);
+        showImg('imgFit',null,d.img_fitting+'?t='+Date.now());
+      }
+    }
+    // 完成
+    if(d.status==='done'&&!done){
+      done=true; clearInterval(pollT);
+      for(let i=1;i<=5;i++)setStep(i,'done');
+      setStatus('done','已完成'); document.getElementById('btnDetect').disabled=false;
+      // ★ Fix: 补偿拟合图单次加载失败的情况
+      ensureFittingImg(d.img_fitting);
+      if(d.detect_time){ document.getElementById('dtBadge').classList.add('on'); document.getElementById('dtText').textContent=d.detect_time; }
+      if(d.serial_number) document.getElementById('snText').textContent=d.serial_number;
+      if(d.reading_before!=null){ const e=document.getElementById('valB'); e.textContent=Number(d.reading_before).toFixed(6); e.classList.add('v'); }
+      if(d.reading_after!=null){  const e=document.getElementById('valA'); e.textContent=Number(d.reading_after).toFixed(6);  e.classList.add('v'); }
+      // ★ 检测完成后，自动加载该序号的历史折线图
+      if(d.serial_number){
+        chartSerial=d.serial_number;
+        document.getElementById('chartSerialText').textContent=d.serial_number;
+        document.getElementById('chartSerialTag').title=d.serial_number;
+        loadChartData(d.serial_number);
+      }
+    }
+    if(d.status==='error'){ clearInterval(pollT); setStatus('error','检测错误'); document.getElementById('btnDetect').disabled=false; ['ldObb','ldDial','ldFit'].forEach(i=>ld(i,0)); }
+  }catch(e){ console.error(e); }
+}
+
+// ══════════════════════════════════════════════
+//  确认 / 修改
+// ══════════════════════════════════════════════
+async function doConfirm(){
+  const r=await fetch('/confirm',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({task_id:curTaskId})});
+  const d=await r.json();
+  appendLog(`✔ 已确认并入库：${d.message||''}`); refreshLog();
+}
+function openModify(){
+  const v=document.getElementById('valA').textContent;
+  document.getElementById('modInp').value=(v==='—.——')?'':v;
+  document.getElementById('ovModify').classList.add('on');
+  setTimeout(()=>document.getElementById('modInp').focus(),60);
+}
+function closeModify(){ document.getElementById('ovModify').classList.remove('on'); }
+async function submitModify(){
+  const val=document.getElementById('modInp').value.trim(); if(!val)return;
+  const r=await fetch('/modify',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({value:val,task_id:curTaskId})});
+  const d=await r.json();
+  closeModify();
+  const e=document.getElementById('valA'); e.textContent=val; e.classList.add('v');
+  appendLog(`✎ 已修改并入库：${val}`); refreshLog();
+  // 修改后刷新图表
+  if(chartSerial) loadChartData(chartSerial);
+}
+document.getElementById('ovModify').addEventListener('click',e=>{ if(e.target===e.currentTarget)closeModify(); });
+
+async function doClear(){
+  await fetch('/clear',{method:'POST'});
+  document.getElementById('logArea').innerHTML=''; appendLog('⊘ 日志已清除');
+}
+async function refreshLog(){
+  try{
+    const r=await fetch('/get_log'); const d=await r.json();
+    const le=document.getElementById('logArea');
+    if(d.content){
+      le.innerHTML=d.content.split('\n').filter(l=>l.trim()).map(l=>{
+        if(l.includes('修正后')||l.includes('correct'))return`<div class="log-s">${l}</div>`;
+        if(l.includes('错误')||l.includes('失败'))return`<div class="log-e">${l}</div>`;
+        if(l.includes('修正前'))return`<div class="log-i">${l}</div>`;
+        return`<div>${l}</div>`;
+      }).join(''); le.scrollTop=le.scrollHeight;
+    }
+    const n=new Date();
+    document.getElementById('logUpd').textContent=`更新 ${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
+  }catch(e){}
+}
+setInterval(refreshLog,1000); refreshLog();
+
+// ══════════════════════════════════════════════
+//  ★★★ 历史折线图 ★★★
+// ══════════════════════════════════════════════
+
+/* 切换显示系列 */
+function toggleSeries(which){
+  if(which==='before'){
+    showBefore=!showBefore;
+    const btn=document.getElementById('togBefore');
+    btn.className='ctag'+(showBefore?' on-a':'');
+  } else {
+    showAfter=!showAfter;
+    const btn=document.getElementById('togAfter');
+    btn.className='ctag'+(showAfter?' on-g':'');
+  }
+  if(histChart) applySeriesVisibility();
+}
+function applySeriesVisibility(){
+  if(!histChart)return;
+  histChart.data.datasets[0].hidden=!showBefore;
+  histChart.data.datasets[1].hidden=!showAfter;
+  histChart.update('none');
+}
+
+/* 刷新图表（手动刷新或 limit 改变） */
+function reloadChart(){
+  if(chartSerial) loadChartData(chartSerial);
+}
+
+/* 主加载函数 */
+async function loadChartData(serial){
+  const limit=document.getElementById('limitSel').value;
+  const ce=document.getElementById('chartEmpty');
+  const cl=document.getElementById('chartLoading');
+  ce.classList.add('hidden'); cl.classList.add('on');
+
+  try{
+    const r=await fetch(`/api/serial_history?serial=${encodeURIComponent(serial)}&limit=${limit}`);
+    const data=await r.json();
+    if(data.error||!data.records||data.records.length===0){
+      destroyChart();
+      ce.classList.remove('hidden'); ce.querySelector('div:last-child').textContent='暂无该仪表的历史记录';
+      clearStats(); return;
+    }
+    renderChart(data.records);
+    updateStats(data.records);
+    ce.classList.add('hidden');
+  }catch(e){
+    console.error('chart load error',e);
+    destroyChart();
+    ce.classList.remove('hidden'); ce.querySelector('div:last-child').textContent='加载失败，请点击刷新重试';
+    clearStats();
+  }finally{
+    cl.classList.remove('on');
+  }
+}
+
+/* 渲染 / 更新 Chart.js */
+function renderChart(records){
+  const labels  = records.map(r=>formatChartLabel(r.detected_at));
+  const bData   = records.map(r=>r.reading_before);
+  const aData   = records.map(r=>r.reading_after);
+  const taskIds = records.map(r=>r.task_id);
+  const dates   = records.map(r=>r.detected_at);
+
+  const canvas=document.getElementById('histChart');
+  const ctx=canvas.getContext('2d');
+
+  // 渐变填充（修正后读数）
+  const gradG=ctx.createLinearGradient(0,0,0,200);
+  gradG.addColorStop(0,'rgba(5,150,105,.18)');
+  gradG.addColorStop(1,'rgba(5,150,105,.01)');
+
+  const gradB=ctx.createLinearGradient(0,0,0,200);
+  gradB.addColorStop(0,'rgba(37,99,235,.14)');
+  gradB.addColorStop(1,'rgba(37,99,235,.01)');
+
+  const cfg={
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {
+          label:'修正前读数',
+          data:bData,
+          borderColor:'#2563eb',
+          backgroundColor:gradB,
+          borderWidth:2,
+          borderDash:[5,4],
+          pointRadius:4,
+          pointHoverRadius:7,
+          pointBackgroundColor:'#2563eb',
+          pointBorderColor:'#fff',
+          pointBorderWidth:2,
+          tension:0.4,
+          fill:true,
+          hidden:!showBefore,
+          taskIds, dates,
+        },
+        {
+          label:'修正后读数',
+          data:aData,
+          borderColor:'#059669',
+          backgroundColor:gradG,
+          borderWidth:2.5,
+          pointRadius:4,
+          pointHoverRadius:7,
+          pointBackgroundColor:'#059669',
+          pointBorderColor:'#fff',
+          pointBorderWidth:2,
+          tension:0.4,
+          fill:true,
+          hidden:!showAfter,
+          taskIds, dates,
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      animation:{ duration: histChart ? 400 : 800, easing:'easeInOutQuart' },
+      plugins:{
+        legend:{
+          display:true,
+          position:'top',
+          align:'end',
+          labels:{
+            boxWidth:10, boxHeight:10, borderRadius:3,
+            font:{ family:"'JetBrains Mono',monospace", size:10 },
+            color:'#64748b', padding:14,
+            usePointStyle:true, pointStyle:'circle',
+          }
+        },
+        tooltip:{
+          backgroundColor:'rgba(15,23,42,.92)',
+          titleColor:'#e2e8f0',
+          bodyColor:'#94a3b8',
+          borderColor:'rgba(37,99,235,.3)',
+          borderWidth:1,
+          padding:12,
+          cornerRadius:8,
+          titleFont:{ family:"'JetBrains Mono',monospace", size:11 },
+          bodyFont:{ family:"'JetBrains Mono',monospace", size:11 },
+          callbacks:{
+            title(items){
+              const idx=items[0].dataIndex;
+              const ds=items[0].dataset;
+              return [`任务：${ds.taskIds[idx]}`, ds.dates[idx]];
+            },
+            label(item){
+              const v=item.raw;
+              return v!=null ? ` ${item.dataset.label}：${Number(v).toFixed(6)}` : null;
+            },
+            afterBody(items){
+              // 若两条线同时可见，显示差值
+              if(items.length===2&&items[0].raw!=null&&items[1].raw!=null){
+                const diff=Math.abs(items[0].raw-items[1].raw);
+                return [`  差值：${diff.toFixed(6)}`];
+              }
+              return [];
+            }
+          }
+        },
+      },
+      scales:{
+        x:{
+          grid:{ color:'rgba(0,0,0,.05)', drawTicks:false },
+          border:{ display:false },
+          ticks:{
+            font:{ family:"'JetBrains Mono',monospace", size:9 },
+            color:'#94a3b8', maxRotation:35, minRotation:0,
+            maxTicksLimit:10,
+            callback(val,idx){ return this.getLabelForValue(idx); }
+          }
+        },
+        y:{
+          position:'left',
+          grid:{ color:'rgba(0,0,0,.05)', drawTicks:false },
+          border:{ display:false, dash:[3,3] },
+          ticks:{
+            font:{ family:"'JetBrains Mono',monospace", size:9 },
+            color:'#94a3b8',
+            callback(v){ return Number(v).toFixed(4); }
+          }
+        }
+      }
+    }
+  };
+
+  if(histChart){
+    // 复用实例，只更新数据（避免闪烁）
+    histChart.data.labels=labels;
+    histChart.data.datasets[0].data=bData;
+    histChart.data.datasets[0].taskIds=taskIds;
+    histChart.data.datasets[0].dates=dates;
+    histChart.data.datasets[0].hidden=!showBefore;
+    histChart.data.datasets[1].data=aData;
+    histChart.data.datasets[1].taskIds=taskIds;
+    histChart.data.datasets[1].dates=dates;
+    histChart.data.datasets[1].hidden=!showAfter;
+    histChart.update();
+  } else {
+    histChart=new Chart(canvas,cfg);
+  }
+}
+
+function destroyChart(){
+  if(histChart){ histChart.destroy(); histChart=null; }
+}
+
+/* 格式化 x 轴日期标签（省略年份显示）*/
+function formatChartLabel(dtStr){
+  if(!dtStr) return '—';
+  // "2025-06-20 14:30:00" → "06/20 14:30"
+  const m=dtStr.match(/\d{4}-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+  return m ? `${m[1]}/${m[2]} ${m[3]}:${m[4]}` : dtStr.slice(5,16);
+}
+
+/* 更新统计摘要 */
+function updateStats(records){
+  const afterVals=records.map(r=>r.reading_after).filter(v=>v!=null);
+  if(!afterVals.length){ clearStats(); return; }
+  const latest=afterVals[afterVals.length-1];
+  const max=Math.max(...afterVals);
+  const min=Math.min(...afterVals);
+  document.getElementById('csCount').textContent=records.length;
+  document.getElementById('csLatest').textContent=Number(latest).toFixed(6);
+  document.getElementById('csMax').textContent=Number(max).toFixed(6);
+  document.getElementById('csMin').textContent=Number(min).toFixed(6);
+  document.getElementById('csRange').textContent=(max-min).toFixed(6);
+  document.getElementById('csCount').className='cs-val a';
+  document.getElementById('csLatest').className='cs-val g';
+  document.getElementById('csMax').className='cs-val o';
+}
+function clearStats(){
+  ['csCount','csLatest','csMax','csMin','csRange'].forEach(id=>{
+    document.getElementById(id).textContent='—';
+    document.getElementById(id).className='cs-val';
+  });
+}
+
+// ══════════════════════════════════════════════
+//  历史记录表格弹窗
+// ══════════════════════════════════════════════
+function openHistory(){ histCurPage=1; document.getElementById('ovHistory').classList.add('on'); loadHistory(); }
+function closeHistory(){ document.getElementById('ovHistory').classList.remove('on'); }
+function histPage(d){ const max=Math.max(1,Math.ceil(histTotal/20)); histCurPage=Math.max(1,Math.min(max,histCurPage+d)); loadHistory(); }
+async function loadHistory(){
+  document.getElementById('histBody').innerHTML='<div class="hist-empty">加载中...</div>';
+  try{
+    const r=await fetch(`/api/history?page=${histCurPage}&size=20`);
+    const d=await r.json();
+    histTotal=d.total;
+    const maxPage=Math.max(1,Math.ceil(d.total/20));
+    document.getElementById('histInfo').textContent=`共 ${d.total} 条  第 ${histCurPage}/${maxPage} 页`;
+    if(!d.records||!d.records.length){ document.getElementById('histBody').innerHTML='<div class="hist-empty">暂无识别记录</div>'; return; }
+    const sb=s=>s==='success'?`<span class="bs bs-ok">成功</span>`:s==='failed'?`<span class="bs bs-fail">失败</span>`:`<span class="bs bs-pend">${s}</span>`;
+    const cb=c=>c?`<span class="bs bs-ok">已确认</span>`:`<span class="bs bs-pend">未确认</span>`;
+    document.getElementById('histBody').innerHTML=`<table>
+      <thead><tr><th>任务编号</th><th>表计序号</th><th>修正前</th><th>修正后</th><th>状态</th><th>确认</th><th>检测时间</th></tr></thead>
+      <tbody>${d.records.map(row=>`<tr>
+        <td>${row.task_id}</td><td>${row.serial_number||'—'}</td>
+        <td>${row.reading_before!=null?Number(row.reading_before).toFixed(6):'—'}</td>
+        <td>${row.reading_after!=null?Number(row.reading_after).toFixed(6):'—'}</td>
+        <td>${sb(row.detect_status)}</td><td>${cb(row.is_confirmed)}</td>
+        <td>${row.detected_at||row.created_at||'—'}</td>
+      </tr>`).join('')}</tbody></table>`;
+  }catch(e){ document.getElementById('histBody').innerHTML='<div class="hist-empty">加载失败</div>'; }
+}
+document.getElementById('ovHistory').addEventListener('click',e=>{ if(e.target===e.currentTarget)closeHistory(); });
+
+// ══════════════════════════════════════════════
+//  工具函数
+// ══════════════════════════════════════════════
+// ★ Fix: 带 onerror 重试的 showImg（最多 6 次，指数退避）
+function showImg(id, phId, url, retryCount = 0) {
+  const MAX_RETRY = 6;
+  const img = document.getElementById(id);
+  if (!img) return;
+  img.onload = () => {
+    img.classList.add('loaded');
+    if (phId) { const ph = document.getElementById(phId); if (ph) ph.style.display = 'none'; }
+  };
+  img.onerror = () => {
+    if (retryCount < MAX_RETRY) {
+      const delay = 500 * Math.pow(2, retryCount);
+      console.warn(`[IMG] ${id} 加载失败，${delay}ms 后重试 (${retryCount+1}/${MAX_RETRY})`);
+      setTimeout(() => {
+        showImg(id, phId, url.split('?')[0] + '?t=' + Date.now(), retryCount + 1);
+      }, delay);
+    } else {
+      console.error(`[IMG] ${id} 重试 ${MAX_RETRY} 次后仍失败：${url}`);
+    }
+  };
+  img.src = url;
+  if (phId) { const ph = document.getElementById(phId); if (ph) ph.style.display = 'none'; }
+}
+
+// ★ Fix: 检测完成后强制确保拟合图已加载（补偿"单次轮询即失败"的时序问题）
+function ensureFittingImg(url) {
+  if (!url) return;
+  const imgEl = document.getElementById('imgFit');
+  if (!imgEl || imgEl.classList.contains('loaded')) return;
+  // 等 800ms 后检查，仍未加载则补偿重试
+  setTimeout(() => {
+    if (!imgEl.classList.contains('loaded')) {
+      console.log('[IMG] 拟合图未加载，补偿重试...');
+      ld('ldFit', 1);
+      showImg('imgFit', null, url.split('?')[0] + '?t=' + Date.now(), 0);
+      imgEl.addEventListener('load', () => ld('ldFit', 0), { once: true });
+      imgEl.addEventListener('error', () => ld('ldFit', 0), { once: true });
+    }
+  }, 800);
+}
+function ld(id,on){ const e=document.getElementById(id); if(e)e.classList.toggle('on',!!on); }
+function resetSteps(){ for(let i=1;i<=5;i++){const e=document.getElementById('s'+i);if(e)e.className='step';} }
+function setStep(n,st){ const e=document.getElementById('s'+n);if(e){e.className='step';e.classList.add(st);} }
+function setStatus(type,text){
+  const e=document.getElementById('taskStatus'); e.className='stag '+type; e.textContent=text;
+  const dot=document.getElementById('gDot');
+  dot.style.background=type==='done'?'var(--a2)':type==='error'?'var(--danger)':type==='running'?'var(--a)':'var(--dim)';
+}
+function appendLog(msg){
+  const e=document.getElementById('logArea');
+  const cls=msg.startsWith('✔')||msg.startsWith('📌')?'log-s':msg.startsWith('❌')?'log-e':
+            msg.startsWith('▶')||msg.startsWith('🚀')||msg.startsWith('📁')?'log-i':'';
+  e.innerHTML+=`<div ${cls?`class="${cls}"`:''}>${msg}</div>`; e.scrollTop=e.scrollHeight;
+}
+function resetUI(){
+  ['imgOrig','imgObb','imgDial','imgFit'].forEach(id=>{const e=document.getElementById(id);e.classList.remove('loaded');e.src='';});
+  document.getElementById('ph1').style.display='';
+  ['valB','valA'].forEach(id=>{const e=document.getElementById(id);e.textContent='—.——';e.classList.remove('v');});
+  document.getElementById('dtText').textContent='——'; document.getElementById('dtBadge').classList.remove('on');
+  document.getElementById('snText').textContent='表计序号待获取';
+  document.getElementById('logArea').innerHTML='';
+  document.getElementById('btnDetect').disabled=true;
+  document.getElementById('tidText').textContent='——'; document.getElementById('tidBadge').style.borderColor='';
+  setStatus('idle','待机'); resetSteps(); done=false;
+  // 重置图表为空态
+  destroyChart();
+  document.getElementById('chartEmpty').classList.remove('hidden');
+  document.getElementById('chartEmpty').querySelector('div:last-child').textContent='检测完成后自动加载历史趋势';
+  clearStats();
+  chartSerial=null;
+  document.getElementById('chartSerialText').textContent='请先完成检测';
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModify(); closeHistory(); } });
+
+// ══════════════════════════════════════════════
+//  ★★★ 实时拍摄 — 摄像头模块 ★★★
+// ══════════════════════════════════════════════
+
+let camStream      = null;   // 当前 MediaStream
+let camFacingMode  = null;   // 当前摄像头方向
+let camCaptured    = null;   // 拍摄的 base64 字符串
+let camHasMultiple = false;  // 是否有多个摄像头（用于切换按钮）
+
+// ── 打开摄像头弹窗 ──────────────────────────────
+async function openCamera() {
+
+  // ★ 修复：提前检测安全上下文。
+  //   浏览器只在 HTTPS 或 localhost 下开放 navigator.mediaDevices，
+  //   通过局域网 IP + HTTP 访问时该对象为 undefined，直接崩溃。
+  if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
+    const onPhone = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (onPhone) {
+      // 手机降级：用带 capture 属性的 input 直接唤起系统相机，无需 HTTPS
+      const inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/*'; inp.capture = 'environment';
+      inp.addEventListener('change', e => { if(e.target.files[0]) upload(e.target.files[0]); });
+      inp.click();
+    } else {
+      // PC 端：弹窗显示原因和解决方法
+      document.getElementById('camOverlay').classList.add('on');
+      document.getElementById('camHint').textContent = '摄像头不可用';
+      showCamError(
+        '⚠ 当前页面通过 HTTP 局域网地址访问，浏览器已禁用摄像头权限。\n\n' +
+        '解决方法 ①（推荐）：服务端安装 pyOpenSSL（pip install pyOpenSSL）后重启，' +
+        '改用 https://' + location.hostname + ':' + location.port + ' 访问。\n\n' +
+        '解决方法 ②：在本机改用 http://127.0.0.1:5000 访问，摄像头可正常使用。\n\n' +
+        '临时替代：关闭此窗口，使用"导入图片"按钮上传本地图片。'
+      );
+    }
+    return;   // ← 不继续执行，避免 undefined.getUserMedia 崩溃
+  }
+
+  document.getElementById('camOverlay').classList.add('on');
+  document.getElementById('camError').classList.remove('show');
+  document.getElementById('camHint').textContent = '摄像头初始化中...';
+
+  // 检测是否有多个摄像头（移动端通常有前后两个）
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(d => d.kind === 'videoinput');
+    camHasMultiple = videoDevices.length > 1;
+    document.getElementById('camSwitchBtn').style.opacity = camHasMultiple ? '1' : '0.3';
+    document.getElementById('camSwitchBtn').disabled = !camHasMultiple;
+  } catch(_) {}
+
+  // 移动端优先使用后置摄像头，PC 使用前置
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  camFacingMode = isMobile ? 'environment' : 'user';
+
+  await startStream(camFacingMode);
+}
+
+// ── 启动视频流 ──────────────────────────────────
+async function startStream(facingMode) {
+  stopStream();  // 先停掉旧流
+
+  // 重置为取景状态
+  resetToViewfinder();
+
+  // ★ 安全网：双重检查（openCamera 已拦截一次，此处防止外部直接调用）
+  if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
+    document.getElementById('camHint').textContent = '摄像头不可用';
+    showCamError('⚠ 当前环境不支持摄像头 API，请改用 HTTPS 或 http://127.0.0.1:5000 访问。');
+    return;
+  }
+
+  const constraints = {
+    video: {
+      facingMode: { ideal: facingMode },
+      width:  { ideal: 1920 },
+      height: { ideal: 1440 },
+    },
+    audio: false
+  };
+
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const video = document.getElementById('camVideo');
+    video.srcObject = camStream;
+    video.onloadedmetadata = () => {
+      video.play();
+      document.getElementById('camHint').textContent = '';
+    };
+    camFacingMode = facingMode;
+    showCamError('');
+
+  } catch (err) {
+    let msg = '';
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      msg = '⚠ 摄像头权限被拒绝。请在浏览器地址栏左侧允许访问摄像头后刷新页面。';
+    } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+      msg = '⚠ 未检测到摄像头设备，请检查摄像头连接。';
+    } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+      msg = '⚠ 摄像头被其他程序占用，请关闭其他使用摄像头的应用后重试。';
+    } else if (err.name === 'OverconstrainedError') {
+      // 尝试降低约束后重启
+      try {
+        camStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        const video = document.getElementById('camVideo');
+        video.srcObject = camStream;
+        video.onloadedmetadata = () => { video.play(); document.getElementById('camHint').textContent = ''; };
+        showCamError('');
+        return;
+      } catch(e2) {
+        msg = `⚠ 摄像头不支持当前分辨率：${e2.message}`;
+      }
+    } else {
+      msg = `⚠ 摄像头启动失败：${err.message}`;
+    }
+    document.getElementById('camHint').textContent = '摄像头不可用';
+    showCamError(msg);
+  }
+}
+
+// ── 停止视频流 ──────────────────────────────────
+function stopStream() {
+  if (camStream) {
+    camStream.getTracks().forEach(t => t.stop());
+    camStream = null;
+  }
+  const video = document.getElementById('camVideo');
+  video.srcObject = null;
+}
+
+// ── 切换前后摄像头 ──────────────────────────────
+async function switchCamera() {
+  if (!camHasMultiple) return;
+  const next = camFacingMode === 'environment' ? 'user' : 'environment';
+  await startStream(next);
+}
+
+// ── 拍摄快门 ────────────────────────────────────
+function capturePhoto() {
+  const video = document.getElementById('camVideo');
+  if (!camStream || video.readyState < 2) {
+    showCamError('⚠ 摄像头尚未就绪，请稍等');
+    return;
+  }
+
+  // 闪光效果
+  const flash = document.getElementById('camFlash');
+  flash.classList.remove('flash');
+  void flash.offsetWidth;  // 强制重排触发动画
+  flash.classList.add('flash');
+
+  // 将当前帧绘制到 canvas
+  const canvas = document.getElementById('camCanvas');
+  canvas.width  = video.videoWidth  || 1280;
+  canvas.height = video.videoHeight || 960;
+  const ctx = canvas.getContext('2d');
+
+  // 前置摄像头水平镜像（更符合自拍习惯）
+  if (camFacingMode === 'user') {
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+  }
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // 获取 base64（JPEG，质量 0.92）
+  camCaptured = canvas.toDataURL('image/jpeg', 0.92);
+
+  // 显示预览
+  const preview = document.getElementById('camPreview');
+  preview.src = camCaptured;
+  preview.classList.add('show');
+  document.getElementById('camVideo').classList.add('hide');
+  document.getElementById('camCrosshair').style.display = 'none';
+
+  // 切换底部按钮
+  document.getElementById('camShutter').style.display = 'none';
+  document.getElementById('camConfirmBtn').classList.add('show');
+  document.getElementById('camSwitchBtn').onclick = retakePhoto;
+  document.getElementById('camSwitchBtn').title = '重新拍摄';
+  document.getElementById('camSwitchBtn').textContent = '↩';
+  document.getElementById('camTitle').textContent = '📷 预览 — 确认使用？';
+}
+
+// ── 重新拍摄 ────────────────────────────────────
+function retakePhoto() {
+  camCaptured = null;
+  resetToViewfinder();
+  // 继续使用当前摄像头流
+  if (!camStream) startStream(camFacingMode);
+}
+
+// ── 重置为取景状态 ──────────────────────────────
+function resetToViewfinder() {
+  document.getElementById('camVideo').classList.remove('hide');
+  document.getElementById('camPreview').classList.remove('show');
+  document.getElementById('camPreview').src = '';
+  document.getElementById('camCrosshair').style.display = 'flex';
+  document.getElementById('camShutter').style.display = 'flex';
+  document.getElementById('camConfirmBtn').classList.remove('show');
+  document.getElementById('camSwitchBtn').onclick = switchCamera;
+  document.getElementById('camSwitchBtn').title = '切换前后摄像头';
+  document.getElementById('camSwitchBtn').textContent = '🔄';
+  document.getElementById('camTitle').textContent = '📷 实时拍摄';
+  camCaptured = null;
+}
+
+// ── 确认使用拍摄图片 ────────────────────────────
+async function usePhoto() {
+  if (!camCaptured) return;
+
+  const confirmBtn = document.getElementById('camConfirmBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = '上传中...';
+
+  try {
+    const r = await fetch('/upload_base64', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: camCaptured })
+    });
+
+    let data = {};
+    const ct = r.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+      data = await r.json();
+    } else {
+      throw new Error(`服务器返回错误 ${r.status}`);
+    }
+    if (!r.ok) throw new Error(data.error || '上传失败');
+
+    // 关闭摄像头弹窗
+    closeCamera();
+
+    // 与 upload() 函数相同的后续处理
+    resetUI();
+    curTaskId = data.task_id;
+    showImg('imgOrig', 'ph1', data.image_url);
+    document.getElementById('btnDetect').disabled = false;
+    setStatus('idle', '就绪');
+    appendLog(`📸 已拍摄：${data.filename}  [${data.task_id}]`);
+    document.getElementById('tidText').textContent  = data.task_id;
+    document.getElementById('tidBadge').style.borderColor = 'var(--a)';
+
+  } catch(e) {
+    showCamError(`⚠ 上传失败：${e.message}`);
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = '✔ 使用此图片';
+  }
+}
+
+// ── 关闭摄像头弹窗 ──────────────────────────────
+function closeCamera() {
+  stopStream();
+  resetToViewfinder();
+  document.getElementById('camOverlay').classList.remove('on');
+  showCamError('');
+  document.getElementById('camHint').textContent = '';
+  document.getElementById('camConfirmBtn').disabled = false;
+  document.getElementById('camConfirmBtn').textContent = '✔ 使用此图片';
+}
+
+// ── 显示/隐藏错误提示 ───────────────────────────
+function showCamError(msg) {
+  const el = document.getElementById('camError');
+  if (msg) { el.textContent = msg; el.classList.add('show'); }
+  else      { el.classList.remove('show'); }
+}
+
+// ESC 关闭摄像头
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('camOverlay').classList.contains('on')) closeCamera();
+  }
+});
+
+
+</script>
+</body>
+</html>
