@@ -1,0 +1,4 @@
+pyqt_pressure_HW_yolo_obb：单张图片读数，结果保存在outputs-今天日期里；
+reading_batch：批量图片读数，当前设置为读取data_show里的图片，读数结果保存在outputs/当前日期精确到秒/里，并形成excel表格保存至a_reading_batch_results文件夹中；
+pic_all：已有不同日期结果在a_reading_results_diff_day中，各个表计随时间变化图保存在a_pic_results_all中，每个表计一张图；
+pic_one：已有不同日期结果在a_reading_results_show_pic_one中，各个表计随时间变化图保存在a_pic_results_one中，一张图包含所有表计。
