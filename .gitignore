@@ -1,0 +1,10 @@
+# IDE
+.vs/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# 临时文件
+*.log
