@@ -48,7 +48,7 @@ SECRET_KEY = "wuliBISHE_secret_key_2025"  # JWT密钥，生产环境请改成更
 # ngrok 相关功能
 import webbrowser
 
-NGROK_URL = "https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app/login"
+NGROK_URL = "https://calamari-scorecard-unsolved.ngrok-free.dev/login"
 
 # 微信路由
 

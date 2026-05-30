@@ -3,7 +3,7 @@
   "appName": "仪态万象",
   "webDir": "www",
   "server": {
-    "url": "https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app",
+    "url": "https://calamari-scorecard-unsolved.ngrok-free.dev",
     "cleartext": false
   },
   "android": {

@@ -13,7 +13,7 @@
 编辑 `app.js`:
 ```javascript
 globalData: {
-  serverUrl: 'https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app',  // 改为你的电脑IP
+  serverUrl: 'https://calamari-scorecard-unsolved.ngrok-free.dev',  // 改为你的电脑IP
 }
 ```
 

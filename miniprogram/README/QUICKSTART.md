@@ -31,7 +31,7 @@ serverUrl: 'http://localhost:5000',  // 改为你的后端地址
 
 如果后端在其他电脑：
 ```javascript
-serverUrl: 'https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app',  // IP改为你的电脑IP
+serverUrl: 'https://calamari-scorecard-unsolved.ngrok-free.dev',  // IP改为你的电脑IP
 ```
 
 ### 4. 开启调试模式（30秒）

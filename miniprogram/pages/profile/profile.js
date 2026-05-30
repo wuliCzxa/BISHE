@@ -116,8 +116,8 @@ Page({
   // },
   // 下载APP
   downloadApp() {
-    const qrUrl = "https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app/static/qrcode_apk_example.png";
-    const apkUrl = "https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app/static/downloads/仪态万象.apk";
+    const qrUrl = "https://calamari-scorecard-unsolved.ngrok-free.dev/static/qrcode_apk_example.png";
+    const apkUrl = "https://calamari-scorecard-unsolved.ngrok-free.devownloads/仪态万象.apk";
 
     wx.showModal({
       title: '下载APP',

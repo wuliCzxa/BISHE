@@ -16,7 +16,7 @@
 //     } = options;
 
 //     // 构建完整URL
-//     // https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app/
+//     // https://calamari-scorecard-unsolved.ngrok-free.dev/
 //     const fullUrl = `${app.globalData.serverUrl}${url}`;
 
 //     // 设置请求头

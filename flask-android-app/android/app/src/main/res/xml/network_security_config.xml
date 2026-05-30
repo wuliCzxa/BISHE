@@ -11,7 +11,7 @@
     <!-- 为你的 Flask 服务器创建特定域配置 -->
     <domain-config cleartextTrafficPermitted="false">
         <!-- 允许访问局域网 -->
-        <!-- 修改局域网为https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app -->
+        <!-- 修改局域网为https://calamari-scorecard-unsolved.ngrok-free.dev -->
         <domain includeSubdomains="true">calamari-scorecard-unsolved.ngrok-free.dev</domain>
 <!--        <domain includeSubdomains="false">192.168.2.44</domain>-->
 <!--        <domain includeSubdomains="false">192.168.45.79</domain>-->

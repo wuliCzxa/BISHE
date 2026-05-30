@@ -2,7 +2,7 @@
 App({
   globalData: {
     // 服务器地址配置 - 修改为你的Flask服务器地址
-    serverUrl: 'https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app',  // 生产环境
+    serverUrl: 'https://calamari-scorecard-unsolved.ngrok-free.dev // 生产环境
     // serverUrl: 'http://localhost:5000',  // 本地开发（需要在微信开发者工具中配置不校验域名）
 
     userInfo: null,
