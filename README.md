@@ -3,8 +3,6 @@
 > 基于 YOLOv11-OBB（旋转目标检测）+ Flask + MySQL 的工业仪表智能读数平台
 >
 > 支持 **Web 浏览器端**、**PyQt5 桌面端**、**批量脚本** 三种使用方式，可一键完成表盘定位→标签识别→刻度检测→数值计算的完整读数流程，并提供历史记录查询与多日期趋势图功能。
-> 
-> 如有问题可+QQ：1939411884/Wechat:wuliZxa
 
 ---
 
@@ -220,7 +218,103 @@ Flask (app.py, port 5000)
 
 ---
 
-## 六、完整部署流程（新手必读）
+## 六、ngrok部署
+
+请严格按顺序执行以下各步骤。
+
+---
+### 1.  官网下载
+
+前往 ngrok 官网（ https://ngrok.com/download ） 注册账号并下载适用于你操作系统的 ngrok 客户端。
+
+---
+
+### 2.  解压与安装
+
+将下载的压缩包解压到一个目录，例如：
+
+```
+D:\ngrok\
+```
+解压后目录下应包含 `ngrok.exe`（Windows）或 `ngrok`（Linux/macOS）可执行文件。
+
+---
+
+### 3.  配置认证令牌（Token）
+
+登录 ngrok 官网，在 Dashboard（控制面板）中找到你的 Auth Token（认证令牌），复制该字符串。
+（ https://dashboard.ngrok.com/get-started/your-authtoken?utm_source=chatgpt.com ）
+
+在命令行中运行以下命令，将 Auth Token 配置到 ngrok 客户端：
+
+```
+ngrok config add-authtoken  <你的 Auth Token>
+```
+
+成功配置后，终端会显示类似以下信息：
+
+```
+Authtoken saved to configuration file: C:\Users\用户名\AppData\Local\ngrok\ngrok.yml
+```
+
+---
+
+### 4.  启动 ngrok 隧道
+
+
+### 4.1 打开终端
+
+在 Windows 上，可以使用 PowerShell 或命令提示符（CMD）。在 Linux/macOS 上，打开终端应用。
+
+#### 进入 ngrok 目录
+
+```bash
+cd F:\ngrok\
+```
+
+
+### 4.2 映射 Flask 端口
+
+```bash
+ngrok http 5000
+```
+
+成功启动后，终端会显示 ngrok 隧道的状态信息，包括公网访问地址（Forwarding）：
+
+```
+Session Status                online
+Account                       Your Name (Plan: Free)
+Version                       3.39.1
+Region                        United States (us)
+Latency                       50ms
+Web Interface                 http://127.0.0.1:4040  
+Forwarding                    https://xxx.ngrok-free.dev -> http://localhost:5000
+
+```
+
+例如
+
+```
+https://xxx.ngrok-free.dev
+```
+
+此地址即在局域网外访问 Flask Web 服务的公网地址。
+
+---
+
+### 5. 访问测试
+
+浏览器访问：
+
+```
+https://xxx.ngrok-free.dev/api/test
+```
+
+如果一切配置正确，应该能看到 Flask 返回的测试响应。
+
+---
+
+## 七、完整部署流程（新手必读）
 
 请严格按顺序执行以下各步骤。
 
@@ -243,14 +337,14 @@ D:\bishe\
 **推荐使用 Conda 隔离环境**，避免与系统其他 Python 项目冲突。
 
 ```bash
-# 若尚未安装 Conda，前往以下地址下载 Miniconda：
-# https://docs.conda.io/en/latest/miniconda.html
+# 若尚未安装 Conda，前往以下地址下载 anaconda:
+# https://www.anaconda.com/download
 
 # 创建专用虚拟环境
-conda create -n bishe python=3.10 -y
+conda create -n visual python=3.10 -y
 
 # 激活环境（此后所有命令均在此环境下执行）
-conda activate bishe
+conda activate visual
 
 # 验证 Python 版本
 python --version    # 应输出 Python 3.10.x
@@ -312,9 +406,7 @@ python -c "import flask, pymysql, ultralytics, cv2, numpy; print('核心依赖�
 用任意文本编辑器打开项目根目录下的 `config.py`，这是**整个系统唯一需要手动编辑的配置文件**，修改后重启 `app.py` 即可生效。
 
 ```python
-# ============================================================
 #  config.py — BISHE 项目统一配置文件
-# ============================================================
 
 # ── MySQL 数据库连接 ──────────────────────────────────────
 DB_HOST     = "localhost"   # 数据库服务器地址（本机部署填 localhost 或 127.0.0.1）
@@ -396,9 +488,9 @@ D:\                              ← 磁盘根目录（或任意位置）
 
 | 序号 | 表计 |
 |------|------|
-| 111 | 1号蒸汽压力表 |
-| 113 | 2号蒸汽压力表 |
-| 119 | 冷却水入口压力表 |
+| 1 | 220kv 白远一线2252 |
+| 19 | 220kv 二次母联2211 |
+| 21 | 220kv 远浑南线2271 |
 | ... | ... |
 
 - 第一列列名**必须**为 `序号`，第二列列名**必须**为 `表计`
@@ -514,17 +606,18 @@ HTTPS 模式：https://localhost:5000/login
 
 | 用户名 | 密码 | 权限级别 |
 |--------|------|---------|
-| `admin` | `admin123` | super_admin（超级管理员） |
+| `super` | `123456` | super_admin(超级管理员)
+| `admin` | `admin123` | admin（管理员） |
 
 > ⚠ **安全提示**：正式投入使用前，请通过数据库管理工具将默认密码修改为强密码，并根据实际需求创建不同权限的用户账号。
 
 ---
 
-## 七、各功能模块详细使用说明
+## 八、各功能模块详细使用说明
 
-### 7.1 Web 端（Flask）
+### 1 Web 端（Flask）
 
-#### 7.1.1 单张图片检测
+#### 1.1 单张图片检测
 
 1. 登录后自动跳转至主页 `/index`
 2. 在上传区域，通过以下任一方式提供图片：
@@ -554,7 +647,7 @@ HTTPS 模式：https://localhost:5000/login
    - **修改**：读数有误，在输入框填写正确数值后提交，数据库中 `reading_after` 更新为手动修正值，并在日志中记录 `corrected:<值>`
    - **清除日志**：清空 `Result_pointer.txt` 文件内容（不影响数据库记录）
 
-#### 7.1.2 历史记录查询
+#### 1.2 历史记录查询
 
 在主页点击"历史记录"标签，展示当前登录用户的所有检测记录，含字段：
 
@@ -562,13 +655,13 @@ HTTPS 模式：https://localhost:5000/login
 
 支持分页浏览（API 参数：`page` 页码，`size` 每页条数，最大 50）。
 
-#### 7.1.3 单表计历史趋势图
+#### 1.3 单表计历史趋势图
 
 在历史记录页面输入表计名称（`serial_number`），点击"查询趋势"，系统从数据库中拉取该表计所有 `detect_status='success'` 的历史记录，在页面内渲染折线趋势图，横轴为检测时间，纵轴为最终读数。
 
 ---
 
-### 7.2 PyQt5 桌面端（单张读数）
+### 2 PyQt5 桌面端（单张读数）
 
 桌面端适合无网络环境、不需要数据库存储或需要快速现场读数的场景。
 
@@ -628,7 +721,7 @@ outputs-YYYY-MM-DD/              ← 脚本同级目录，每天一个文件夹
 
 ---
 
-### 7.3 批量图片读数脚本
+### 3 批量图片读数脚本
 
 适用于已有一批现场照片需要一次性批量处理的场景，无需人工逐张操作。
 
@@ -691,7 +784,7 @@ a_reading_batch_results/
 
 ---
 
-### 7.4 多日期趋势图生成
+### 4 多日期趋势图生成
 
 适用于已积累多日批量读数 Excel 文件，想直观查看各表计读数随时间变化的趋势。
 
@@ -734,11 +827,11 @@ python pic_one.py
 
 ---
 
-## 八、模型训练完整流程（开发者）
+## 九、模型训练完整流程（开发者）
 
 如果需要在自己采集的数据集上重新训练模型，请按以下流程操作。
 
-### 8.1 数据标注说明
+### 1 数据标注说明
 
 **推荐标注工具：** [RoLabelImg](https://github.com/cgvict/roLabelImg)
 
@@ -758,7 +851,9 @@ python pic_one.py
 
 > Model 4 的 `Scale`、`Scale2`、`Pointer` 和中间参考刻度（类别 ID 最小值，对应`Scale`排序后第三项）的旋转框必须能清晰区分刻度线的延伸方向，这是角度计算精度的关键。
 
-### 8.2 标注数据转换
+---
+
+### 2 标注数据转换
 
 **第一步：RoLabelImg XML → DOTA XML → DOTA TXT**
 
@@ -796,7 +891,9 @@ python z_2_txt2txt.py
 
 输出至 `datasets/pressure_4read_xml2txt/labels/train/` 和 `.../val/`。
 
-### 8.3 训练 Model 1 / 2 / 3
+---
+
+### 3 训练 Model 1 / 2 / 3
 
 为每个模型准备 YAML 数据集配置文件（参考 `yaml/` 目录下已有文件，格式遵循 Ultralytics 规范），然后修改 `dataset_train.py` 中对应行的注释，运行训练：
 
@@ -822,7 +919,9 @@ python dataset_train.py
 | `workers` | 0 | Windows 下必须设为 0，否则 DataLoader 多进程报错 |
 | `conf` | 0.7 | 推理置信度阈值 |
 
-### 8.4 训练 Model 4（OBB 读数模型）
+---
+
+### 4 训练 Model 4（OBB 读数模型）
 
 Model 4 使用 YOLOv11-OBB 架构，训练命令封装在 `z_3train_read.py`：
 
@@ -840,7 +939,9 @@ python z_3train_read.py
 - `yaml/dataset_4read.yaml` 中 `nc`（类别数）和 `names` 列表与 `z_1_xml2data.py` 中的 `cls_list` 完全一致
 - `yolo11n-obb.pt` 预训练权重已下载（首次运行时 Ultralytics 会自动从网络下载）
 
-### 8.5 测试验证
+---
+
+### 5 测试验证
 
 ```bash
 python z_4_test_read.py
@@ -850,11 +951,13 @@ python z_4_test_read.py
 
 ---
 
-## 九、核心读数算法详解
+## 十、核心读数算法详解
 
 Model 4 输出每个检测目标的**旋转边界框（OBB）**，包含四个角点的归一化坐标（9 列数据：类别 ID + 8 个坐标值）。读数算法基于几何方法，利用这些 OBB 坐标计算指针的角度比例，转换为物理读数。
 
-### 9.1 OBB 坐标预处理
+---
+
+### 1 OBB 坐标预处理
 
 Model 4 每行输出格式：
 
@@ -869,7 +972,9 @@ xsf = (x_s1 + x_s2 + x_s3 + x_s4) / 4  # 起始刻度中心
 ysf = (y_s1 + y_s2 + y_s3 + y_s4) / 4
 ```
 
-### 9.2 圆心估算（双方法融合，提高精度）
+---
+
+### 2 圆心估算（双方法融合，提高精度）
 
 **OBB 短边中点延长线法：** 将 OBB 四条边按长度升序排列，取两条**最短边**各自的中点，连接两个中点形成穿过 OBB 轴线的直线。
 
@@ -886,7 +991,9 @@ acx = (cx + cxx) / 2
 acy = (cy + cyy) / 2
 ```
 
-### 9.3 角度比例法计算读数
+---
+
+### 3 角度比例法计算读数
 
 以最终圆心为原点，利用向量**顺时针夹角**公式（叉积判断方向，点积计算角度）：
 
@@ -905,7 +1012,9 @@ acy = (cy + cyy) / 2
 
 其中 `readValue3 = θ₃/θ₂ × 1 - 0.1` 是以当前圆心计算得到的中间参考刻度处理论读数。由于中间参考刻度的真实物理值已知（当前设定为 0.4 MPa），`(0.4 - readValue3)` 即圆心偏差引起的系统误差，除以 2 后补偿到最终读数，进一步提高精度。
 
-### 9.4 拟合结果图标注说明
+---
+
+### 4 拟合结果图标注说明
 
 `_fitting.jpg` 图像上标注了 6 个关键几何点：
 
@@ -920,7 +1029,7 @@ acy = (cy + cyy) / 2
 
 ---
 
-## 十、API 接口说明
+## 十一、API 接口说明
 
 以下为 Flask 提供的所有主要接口，均需已登录（Session 有效）才能访问（标注"公开"的除外）：
 
@@ -961,7 +1070,7 @@ acy = (cy + cyy) / 2
 
 ---
 
-## 十一、用户权限体系
+## 十二、用户权限体系
 
 系统预设三级权限，存储于 `user.user_level` 字段：
 
@@ -975,9 +1084,11 @@ acy = (cy + cyy) / 2
 
 ---
 
-## 十二、输出文件说明
+## 十三、输出文件说明
 
-### 12.1 Result_pointer.txt（读数历史日志）
+---
+
+### 1 Result_pointer.txt（读数历史日志）
 
 每次检测成功后，系统自动向 `TXT_LOG_PATH`（由 `config.py` 配置）追加写入记录。
 
@@ -1006,7 +1117,9 @@ The reading is correct.
 
 > 注意：Web 端与桌面端使用不同编码（UTF-8 vs GBK），混合使用同一日志文件时可能出现乱码，建议按需分开使用或统一编码。
 
-### 12.2 outputs/ 目录结构
+---
+
+### 2 outputs/ 目录结构
 
 ```
 outputs/
@@ -1021,7 +1134,9 @@ outputs/
 
 ---
 
-## 十三、常见问题与排错指南
+## 十四、常见问题与排错指南
+
+---
 
 ### ❌ MySQL 端口不可达（错误 2003）
 
@@ -1141,7 +1256,10 @@ pip install pyOpenSSL
 
 ---
 
-## 十四、注意事项与已知限制
+## 十五、注意事项与已知限制
+
+---
+
 
 **量程硬编码：** 当前读数算法中量程固定为 -0.1\~0.9 MPa（满量程 1 MPa）。公式体现在各脚本的 `× 1 - 0.1` 处。若现场压力表量程不同（如 0\~1.6 MPa），需同时修改 `app.py`、`reading_batch.py`、`pyqt_pressure_HW_yolo_obb.py` 三处的读数计算公式，以及中间参考刻度的真实值（当前设定为 0.4 MPa）。
 
