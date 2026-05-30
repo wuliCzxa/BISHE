@@ -1,0 +1,135 @@
+<!--pages/detail/detail.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">检测详情</text>
+  </view>
+
+  <scroll-view scroll-y class="scroll-content" wx:if="{{detail}}">
+    <!-- 基本信息 -->
+    <view class="section">
+      <view class="section-title">基本信息</view>
+      <view class="info-card">
+        <view class="info-item">
+          <text class="label">任务ID</text>
+          <text class="value">{{detail.task_id}}</text>
+        </view>
+        <view class="info-item" wx:if="{{detail.serial_number}}">
+          <text class="label">序列号</text>
+          <text class="value">{{detail.serial_number}}</text>
+        </view>
+        <view class="info-item">
+          <text class="label">检测状态</text>
+          <text class="value status-{{detail.detect_status}}">{{statusMap[detail.detect_status]}}</text>
+        </view>
+        <view class="info-item">
+          <text class="label">确认状态</text>
+          <text class="value">{{detail.is_confirmed ? '已确认' : '未确认'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 读数信息 -->
+    <view class="section" wx:if="{{detail.reading_before !== null || detail.reading_after !== null}}">
+      <view class="section-title">读数信息</view>
+      <view class="reading-card">
+        <view class="reading-item" wx:if="{{detail.reading_before !== null}}">
+          <text class="reading-label">初始读数</text>
+          <text class="reading-value">{{detail.reading_before}}</text>
+        </view>
+        <view class="reading-item" wx:if="{{detail.reading_after !== null}}">
+          <text class="reading-label">修正读数</text>
+          <text class="reading-value highlight">{{detail.reading_after}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 原始图片 -->
+    <view class="section" wx:if="{{detail.original_img_path}}">
+      <view class="section-title">原始图片</view>
+      <image 
+        class="detail-image" 
+        src="{{getImageUrl(detail.original_img_path)}}" 
+        mode="aspectFit"
+        bindtap="previewImage"
+        data-url="{{getImageUrl(detail.original_img_path)}}"
+      ></image>
+    </view>
+
+    <!-- 检测结果图片 -->
+    <view class="section" wx:if="{{detail.detect_status === 'success'}}">
+      <view class="section-title">检测结果</view>
+      
+      <view class="result-images">
+        <view class="image-wrapper" wx:if="{{detail.dial_img_path}}">
+          <text class="image-label">表盘识别</text>
+          <image 
+            class="result-image" 
+            src="{{getImageUrl(detail.dial_img_path)}}" 
+            mode="aspectFit"
+            bindtap="previewImage"
+            data-url="{{getImageUrl(detail.dial_img_path)}}"
+          ></image>
+        </view>
+
+        <view class="image-wrapper" wx:if="{{detail.label_img_path}}">
+          <text class="image-label">标签识别</text>
+          <image 
+            class="result-image" 
+            src="{{getImageUrl(detail.label_img_path)}}" 
+            mode="aspectFit"
+            bindtap="previewImage"
+            data-url="{{getImageUrl(detail.label_img_path)}}"
+          ></image>
+        </view>
+
+        <view class="image-wrapper" wx:if="{{detail.obb_img_path}}">
+          <text class="image-label">指针检测</text>
+          <image 
+            class="result-image" 
+            src="{{getImageUrl(detail.obb_img_path)}}" 
+            mode="aspectFit"
+            bindtap="previewImage"
+            data-url="{{getImageUrl(detail.obb_img_path)}}"
+          ></image>
+        </view>
+      </view>
+    </view>
+
+    <!-- 时间信息 -->
+    <view class="section">
+      <view class="section-title">时间信息</view>
+      <view class="info-card">
+        <view class="info-item">
+          <text class="label">创建时间</text>
+          <text class="value time">{{detail.created_at}}</text>
+        </view>
+        <view class="info-item" wx:if="{{detail.detected_at}}">
+          <text class="label">检测时间</text>
+          <text class="value time">{{detail.detected_at}}</text>
+        </view>
+        <view class="info-item" wx:if="{{detail.confirmed_at}}">
+          <text class="label">确认时间</text>
+          <text class="value time">{{detail.confirmed_at}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-section" wx:if="{{detail.detect_status === 'success'}}">
+      <button class="action-btn modify-btn" bindtap="modifyReading" wx:if="{{!detail.is_confirmed}}">
+        修改读数
+      </button>
+      <button class="action-btn confirm-btn" bindtap="confirmResult" wx:if="{{!detail.is_confirmed}}">
+        确认结果
+      </button>
+      <button class="action-btn chart-btn" bindtap="viewChart" wx:if="{{detail.serial_number}}">
+        查看趋势
+      </button>
+    </view>
+  </scroll-view>
+
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

@@ -1,0 +1,88 @@
+<!--pages/history/history.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">检测历史</text>
+  </view>
+
+  <!-- 筛选条件 -->
+  <view class="filter-section">
+    <input 
+      class="search-input" 
+      type="text" 
+      placeholder="输入序列号搜索" 
+      value="{{searchSerial}}"
+      bindinput="onSearchInput"
+      bindconfirm="handleSearch"
+    />
+    <button class="search-btn" bindtap="handleSearch">搜索</button>
+  </view>
+
+  <!-- 历史记录列表 -->
+  <view class="list-section">
+    <scroll-view 
+      scroll-y 
+      class="scroll-view"
+      bindscrolltolower="loadMore"
+      lower-threshold="100"
+    >
+      <view 
+        class="record-item" 
+        wx:for="{{records}}" 
+        wx:key="task_id"
+        bindtap="viewDetail"
+        data-task-id="{{item.task_id}}"
+      >
+        <view class="record-header">
+          <view class="task-id">
+            <image class="icon-small" src="/images/task.png"></image>
+            <text>{{item.task_id}}</text>
+          </view>
+          <view class="status status-{{item.detect_status}}">
+            {{statusMap[item.detect_status]}}
+          </view>
+        </view>
+
+        <view class="record-body">
+          <view class="info-row" wx:if="{{item.serial_number}}">
+            <text class="label">序列号：</text>
+            <text class="value">{{item.serial_number}}</text>
+          </view>
+          <view class="info-row" wx:if="{{item.reading_after !== null}}">
+            <text class="label">读数：</text>
+            <text class="value reading">{{item.reading_after}}</text>
+          </view>
+          <view class="info-row" wx:elif="{{item.reading_before !== null}}">
+            <text class="label">读数：</text>
+            <text class="value reading">{{item.reading_before}}</text>
+          </view>
+          <view class="info-row">
+            <text class="label">时间：</text>
+            <text class="value time">{{item.detected_at || item.created_at}}</text>
+          </view>
+        </view>
+
+        <view class="record-footer">
+          <view class="confirm-tag" wx:if="{{item.is_confirmed}}">
+            <image class="tag-icon" src="/images/check.png"></image>
+            <text>已确认</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 加载状态 -->
+      <view class="loading-more" wx:if="{{loading}}">
+        <text>加载中...</text>
+      </view>
+
+      <view class="no-more" wx:if="{{!hasMore && records.length > 0}}">
+        <text>没有更多了</text>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{!loading && records.length === 0}}">
+        <image class="empty-image" src="/images/empty.png"></image>
+        <text class="empty-text">暂无检测记录</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

@@ -1,0 +1,52 @@
+<!--pages/login/login.wxml-->
+<view class="container">
+  <view class="logo-section">
+    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+    <text class="app-name">仪表读数识别</text>
+  </view>
+
+  <view class="form-section">
+    <view class="input-group">
+      <view class="input-label">
+        <image class="icon" src="/images/user.png"></image>
+      </view>
+      <input 
+        class="input-field" 
+        type="text" 
+        placeholder="请输入用户名" 
+        value="{{username}}"
+        bindinput="onUsernameInput"
+      />
+    </view>
+
+    <view class="input-group">
+      <view class="input-label">
+        <image class="icon" src="/images/lock.png"></image>
+      </view>
+      <input 
+        class="input-field" 
+        type="{{showPassword ? 'text' : 'password'}}" 
+        placeholder="请输入密码" 
+        value="{{password}}"
+        bindinput="onPasswordInput"
+      />
+      <view class="toggle-password" bindtap="togglePassword">
+        <image class="icon-small" src="{{showPassword ? '/images/eye-open.png' : '/images/eye-close.png'}}"></image>
+      </view>
+    </view>
+
+    <button class="login-btn" bindtap="handleLogin" disabled="{{loading}}">
+      {{loading ? '登录中...' : '登录'}}
+    </button>
+
+    <view class="actions">
+      <navigator url="/pages/register/register" class="link">
+        <text>还没有账号？立即注册</text>
+      </navigator>
+    </view>
+  </view>
+
+  <view class="footer">
+    <text class="copyright">© 2026 仪态万象</text>
+  </view>
+</view>

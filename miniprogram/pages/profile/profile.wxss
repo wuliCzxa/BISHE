@@ -1,0 +1,173 @@
+/* pages/profile/profile.wxss */
+.container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding-bottom: 120rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 60rpx 30rpx;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  background-color: #fff;
+  margin-right: 30rpx;
+}
+
+.user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.username {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 10rpx;
+}
+
+.user-level {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 5rpx 15rpx;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 15rpx;
+  align-self: flex-start;
+}
+
+.menu-section {
+  background-color: #fff;
+  margin: 20rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-left {
+  display: flex;
+  align-items: center;
+}
+
+.menu-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 20rpx;
+}
+
+.menu-text {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.arrow-icon {
+  width: 24rpx;
+  height: 24rpx;
+}
+
+.settings-section {
+  background-color: #fff;
+  margin: 20rpx;
+  border-radius: 20rpx;
+  padding: 30rpx;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-left {
+  display: flex;
+  align-items: center;
+}
+
+.setting-icon {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 15rpx;
+}
+
+.setting-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.setting-value {
+  font-size: 24rpx;
+  color: #999;
+  max-width: 400rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.about-section {
+  display: flex;
+  justify-content: space-around;
+  background-color: #fff;
+  margin: 20rpx;
+  border-radius: 20rpx;
+  padding: 30rpx;
+}
+
+.about-item {
+  font-size: 26rpx;
+  color: #667eea;
+}
+
+.logout-btn {
+  width: calc(100% - 40rpx);
+  height: 90rpx;
+  line-height: 90rpx;
+  background-color: #fff;
+  color: #f5222d;
+  font-size: 30rpx;
+  border-radius: 10rpx;
+  border: 1px solid #f5222d;
+  margin: 20rpx;
+}
+
+.footer {
+  text-align: center;
+  padding: 30rpx;
+}
+
+.copyright {
+  font-size: 22rpx;
+  color: #999;
+}

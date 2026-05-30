@@ -1,0 +1,70 @@
+<!--pages/chart/chart.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">历史趋势</text>
+    <text class="subtitle">序列号：{{serial}}</text>
+  </view>
+
+  <scroll-view scroll-y class="scroll-content">
+    <!-- 统计信息 -->
+    <view class="stats-section">
+      <view class="stat-item">
+        <text class="stat-value">{{records.length}}</text>
+        <text class="stat-label">总检测次数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{confirmedCount}}</text>
+        <text class="stat-label">已确认</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{latestReading}}</text>
+        <text class="stat-label">最新读数</text>
+      </view>
+    </view>
+
+    <!-- 图表区域 -->
+    <view class="chart-section">
+      <view class="section-title">读数趋势图</view>
+      <canvas 
+        canvas-id="lineChart" 
+        class="chart-canvas"
+        disable-scroll="true"
+      ></canvas>
+    </view>
+
+    <!-- 数据列表 -->
+    <view class="data-section">
+      <view class="section-title">检测记录</view>
+      <view class="data-list">
+        <view 
+          class="data-item" 
+          wx:for="{{records}}" 
+          wx:key="task_id"
+          bindtap="viewDetail"
+          data-task-id="{{item.task_id}}"
+        >
+          <view class="data-left">
+            <text class="data-time">{{formatTime(item.detected_at)}}</text>
+            <text class="data-reading">读数：{{item.reading_after || item.reading_before}}</text>
+          </view>
+          <view class="data-right">
+            <view class="confirm-badge" wx:if="{{item.is_confirmed}}">
+              <image class="badge-icon" src="/images/check-small.png"></image>
+            </view>
+          </view>
+        </view>
+
+        <!-- 空状态 -->
+        <view class="empty-state" wx:if="{{records.length === 0 && !loading}}">
+          <image class="empty-image" src="/images/empty.png"></image>
+          <text class="empty-text">暂无检测记录</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view class="loading-state" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+  </scroll-view>
+</view>

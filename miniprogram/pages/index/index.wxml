@@ -1,0 +1,140 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">仪态万象</text>
+    <text class="subtitle">上传仪表图片进行智能识别</text>
+  </view>
+
+  <!-- 序列号输入 -->
+  <view class="serial-section">
+    <view class="section-title">
+      <image class="title-icon" src="/images/serial.png"></image>
+      <text>序列号（选填）</text>
+    </view>
+    <input 
+      class="serial-input" 
+      type="text" 
+      placeholder="请输入仪表序列号" 
+      value="{{serialNumber}}"
+      bindinput="onSerialInput"
+    />
+  </view>
+
+  <!-- 图片上传区域 -->
+  <view class="upload-section">
+    <view class="section-title">
+      <image class="title-icon" src="/images/upload.png"></image>
+      <text>选择图片</text>
+    </view>
+
+    <view class="upload-actions">
+      <button class="action-btn camera-btn" bindtap="takePhoto">
+        <image class="btn-icon" src="/images/camera-btn.png"></image>
+        <text>拍照</text>
+      </button>
+      <button class="action-btn album-btn" bindtap="chooseImage">
+        <image class="btn-icon" src="/images/album.png"></image>
+        <text>相册</text>
+      </button>
+    </view>
+
+    <!-- 图片预览 -->
+    <view class="preview-area" wx:if="{{imageUrl}}">
+      <image class="preview-image" src="{{imageUrl}}" mode="aspectFit"></image>
+      <view class="preview-mask" bindtap="removeImage">
+        <image class="close-icon" src="/images/close.png"></image>
+      </view>
+    </view>
+  </view>
+
+  <!-- 检测按钮 -->
+  <button 
+    class="detect-btn" 
+    bindtap="startDetect" 
+    disabled="{{!imageUrl || detecting}}"
+  >
+    {{detecting ? '检测中...' : '开始检测'}}
+  </button>
+
+  <!-- 检测进度 -->
+  <view class="progress-section" wx:if="{{detecting}}">
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progress}}%;"></view>
+    </view>
+    <text class="progress-text">{{statusText}}</text>
+  </view>
+
+  <!-- 检测结果 -->
+  <view class="result-section" wx:if="{{result}}">
+    <view class="section-title">
+      <image class="title-icon" src="/images/result.png"></image>
+      <text>检测结果</text>
+    </view>
+
+    <view class="result-card">
+      <view class="result-item">
+        <text class="label">任务ID：</text>
+        <text class="value">{{result.task_id}}</text>
+      </view>
+      <view class="result-item" wx:if="{{result.serial_number}}">
+        <text class="label">序列号：</text>
+        <text class="value">{{result.serial_number}}</text>
+      </view>
+      <view class="result-item">
+        <text class="label">检测状态：</text>
+        <text class="value status-{{result.detect_status}}">{{statusMap[result.detect_status]}}</text>
+      </view>
+      <view class="result-item" wx:if="{{result.reading_before !== null}}">
+        <text class="label">读数：</text>
+        <text class="value reading">{{result.reading_before}}</text>
+      </view>
+    </view>
+
+    <!-- 结果图片 -->
+    <view class="result-images" wx:if="{{result.detect_status === 'success'}}">
+      <view class="image-item" wx:if="{{result.dial_img_path}}">
+        <text class="image-label">表盘识别</text>
+        <image 
+          class="result-image" 
+          src="{{getImageUrl(result.dial_img_path)}}" 
+          mode="aspectFit"
+          bindtap="previewImage"
+          data-url="{{getImageUrl(result.dial_img_path)}}"
+        ></image>
+      </view>
+      <view class="image-item" wx:if="{{result.label_img_path}}">
+        <text class="image-label">标签识别</text>
+        <image 
+          class="result-image" 
+          src="{{getImageUrl(result.label_img_path)}}" 
+          mode="aspectFit"
+          bindtap="previewImage"
+          data-url="{{getImageUrl(result.label_img_path)}}"
+        ></image>
+      </view>
+      <view class="image-item" wx:if="{{result.obb_img_path}}">
+        <text class="image-label">指针检测</text>
+        <image 
+          class="result-image" 
+          src="{{getImageUrl(result.obb_img_path)}}" 
+          mode="aspectFit"
+          bindtap="previewImage"
+          data-url="{{getImageUrl(result.obb_img_path)}}"
+        ></image>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button class="action-button modify-btn" bindtap="modifyReading">
+        修改读数
+      </button>
+      <button class="action-button confirm-btn" bindtap="confirmResult">
+        确认结果
+      </button>
+      <button class="action-button detail-btn" bindtap="viewDetail">
+        查看详情
+      </button>
+    </view>
+  </view>
+</view>

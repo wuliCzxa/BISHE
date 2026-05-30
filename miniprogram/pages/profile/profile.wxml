@@ -1,0 +1,73 @@
+<!--pages/profile/profile.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="user-info">
+      <image class="avatar" src="/images/avatar.png"></image>
+      <view class="user-details">
+        <text class="username">{{username}}</text>
+        <text class="user-level">{{userLevelMap[userLevel]}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="menu-section">
+    <view class="menu-item" bindtap="viewHistory">
+      <view class="menu-left">
+        <image class="menu-icon" src="/images/history-icon.png"></image>
+        <text class="menu-text">检测历史</text>
+      </view>
+      <image class="arrow-icon" src="/images/arrow-right.png"></image>
+    </view>
+
+    <view class="menu-item" bindtap="viewLogs">
+      <view class="menu-left">
+        <image class="menu-icon" src="/images/log-icon.png"></image>
+        <text class="menu-text">操作日志</text>
+      </view>
+      <image class="arrow-icon" src="/images/arrow-right.png"></image>
+    </view>
+
+    <view class="menu-item" bindtap="downloadApp">
+      <view class="menu-left">
+        <image class="menu-icon" src="/images/download-icon.png"></image>
+        <text class="menu-text">下载APP</text>
+      </view>
+      <image class="arrow-icon" src="/images/arrow-right.png"></image>
+    </view>
+  </view>
+
+  <view class="settings-section">
+    <view class="section-title">系统设置</view>
+    
+    <view class="setting-item">
+      <view class="setting-left">
+        <image class="setting-icon" src="/images/server-icon.png"></image>
+        <text class="setting-text">服务器地址</text>
+      </view>
+      <text class="setting-value">{{serverUrl}}</text>
+    </view>
+
+    <view class="setting-item">
+      <view class="setting-left">
+        <image class="setting-icon" src="/images/version-icon.png"></image>
+        <text class="setting-text">版本信息</text>
+      </view>
+      <text class="setting-value">v2.9.3</text>
+    </view>
+  </view>
+
+  <view class="about-section">
+    <view class="about-item" bindtap="showAbout">
+      <text>关于我们</text>
+    </view>
+    <view class="about-item" bindtap="showHelp">
+      <text>使用帮助</text>
+    </view>
+  </view>
+
+  <button class="logout-btn" bindtap="handleLogout">退出登录</button>
+
+  <view class="footer">
+    <text class="copyright">© 2025 仪表读数识别系统</text>
+  </view>
+</view>
