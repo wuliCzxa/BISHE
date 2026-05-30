@@ -1,0 +1,8 @@
+# 二维码功能所需依赖
+# 安装方式：pip install -r requirements_qrcode.txt --break-system-packages
+
+qrcode>=7.4.2
+Pillow>=10.0.0
+
+# 如果需要生成高级样式的二维码（可选）
+# qrcode[pil]>=7.4.2
