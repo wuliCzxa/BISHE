@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>仪态万象</title>
+<style>
+body,html{margin:0;height:100%;overflow:hidden;}
+#iframe{width:100%;height:100%;border:none;}
+.loading{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">正在连接服务器...</div>
+
+<iframe id="iframe" src="https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app"></iframe>
+
+<script>
+const iframe = document.getElementById("iframe");
+const loading = document.getElementById("loading");
+
+setTimeout(() => {
+    document.getElementById('error').innerText = "连接超时，请检查服务器";
+}, 10000);
+~
+iframe.onload = () => loading.style.display="none";
+iframe.onerror = () => loading.innerText="连接失败";
+</script>
+
+</body>
+</html>

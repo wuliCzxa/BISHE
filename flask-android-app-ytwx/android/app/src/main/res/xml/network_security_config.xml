@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+
+    <!--    新增-->
+    <!-- 为你的 Flask 服务器创建特定域配置 -->
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- 允许访问局域网 -->
+        <!-- 修改局域网为https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app -->
+        <domain includeSubdomains="true">69c1-2408-862e-807-c000-00-68a.ngrok-free.app</domain>
+<!--        <domain includeSubdomains="false">192.168.2.44</domain>-->
+<!--        <domain includeSubdomains="false">192.168.45.79</domain>-->
+        <trust-anchors>
+            <!-- 信任所有证书（包括自签名证书） -->
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- 如果需要访问其他本地 IP，可以添加更多配置 -->
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- 本地网络 IP 范围 -->
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+
+</network-security-config>

@@ -1,0 +1,13 @@
+{
+  "appId": "com.mycompany.flaskapp",
+  "appName": "仪态万象",
+  "webDir": "www",
+  "server": {
+    "url": "https://69c1-2408-862e-807-c000-00-68a.ngrok-free.app",
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
