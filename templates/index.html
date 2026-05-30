@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>指针式仪表读数检测识别系统</title>
+<title>仪态万象</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <!-- Chart.js from CDN -->
@@ -138,9 +138,7 @@ body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100
 .stag.done{background:#f0fdf4;color:var(--a2);border:1px solid #a7f3d0;}
 .stag.error{background:#fef2f2;color:var(--danger);border:1px solid #fecaca;}
 
-/* ══════════════════════════════════════════════
-   历史折线图区域
-══════════════════════════════════════════════ */
+/* 历史折线图区域 */
 .chart-section{
   padding:12px 14px;
   border-bottom:1px solid var(--bd);
@@ -268,9 +266,7 @@ tr:hover td{background:#f8fafc;}
 @media(max-width:1100px){.ws{grid-template-columns:1fr 1fr;}.panel:last-child{grid-column:1/-1;}}
 @media(max-width:700px){.ws{grid-template-columns:1fr;}.panel:last-child{grid-column:1;}}
 
-/* ══════════════════════════════════════════════
-   摄像头弹窗
-══════════════════════════════════════════════ */
+/* 摄像头弹窗样式 */
 .cam-modal{
   width:min(520px,96vw);
   background:#fff;border:1px solid var(--bd);border-radius:var(--rl);
@@ -370,17 +366,122 @@ tr:hover td{background:#f8fafc;}
   cursor:pointer;transition:all var(--ease);white-space:nowrap;
 }
 .cam-close-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+/* 二维码浮动卡片 - 添加到样式表末尾 */
+.qrcode-float {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #fff;
+  border: 1px solid var(--bd);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--sh), 0 8px 24px rgba(0,0,0,.08);
+  z-index: 50;
+  transition: all var(--ease);
+  max-width: 200px;
+}
+.qrcode-float:hover {
+  box-shadow: var(--sh2), 0 12px 36px rgba(37,99,235,.15);
+  transform: translateY(-2px);
+}
+.qrcode-float-mini {
+  cursor: pointer;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--a) 0%, #60a5fa 100%);
+  border: 2px solid #fff;
+  box-shadow: 0 4px 16px rgba(37,99,235,.3);
+}
+.qrcode-float-mini:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+.qrcode-float-mini .qr-icon {
+  font-size: 28px;
+  animation: qr-pulse 2s ease-in-out infinite;
+}
+@keyframes qr-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.qrcode-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.qrcode-title {
+  font-family: var(--fm);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: .04em;
+}
+.qrcode-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color var(--ease);
+}
+.qrcode-close:hover {
+  color: var(--danger);
+}
+.qrcode-img-wrapper {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto;
+  border-radius: 8px;
+  border: 2px solid var(--bd);
+  background: #fff;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.qrcode-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.qrcode-desc {
+  font-family: var(--fm);
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.5;
+}
+.qrcode-type {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--blue-l);
+  color: var(--a);
+  font-size: 10px;
+  font-weight: 500;
+  font-family: var(--fm);
+}
 </style>
 </head>
 <body>
 
-<!-- ═══ Header ═══ -->
+<!-- 顶部导航 -->
 <header class="hdr">
   <div class="hdr-l">
     <div class="sdot" id="gDot"></div>
-    <span style="font-family:var(--fm);font-size:11px;color:var(--muted)">BISHE·SYS</span>
+    <span style="font-family:var(--fm);font-size:11px;color:var(--muted)">DETECTION·SYS</span>
   </div>
-  <h1 class="hdr-title">指针式仪表<span> 读数检测识别系统</span></h1>
+  <h1 class="hdr-title">
+    仪态万象
+    <span> Scrutinize</span>
+  </h1>
   <div class="hdr-r">
     <span class="sys-time" id="sysT"></span>
     <div class="uinfo">
@@ -392,7 +493,7 @@ tr:hover td{background:#f8fafc;}
   </div>
 </header>
 
-<!-- ═══ 工作区 ═══ -->
+<!-- 主工作区 -->
 <main class="ws">
 
   <!-- ▌左栏▌ -->
@@ -500,7 +601,7 @@ tr:hover td{background:#f8fafc;}
       <div class="log" id="logArea"></div>
     </div>
 
-    <!-- ════ 历史数据折线图 ════ -->
+    <!-- 历史折线图 -->
     <div class="chart-section">
       <!-- 标题行 -->
       <div class="chart-header">
@@ -564,7 +665,7 @@ tr:hover td{background:#f8fafc;}
         </div>
       </div>
     </div>
-    <!-- ════ 历史数据折线图 END ════ -->
+    
 
     <!-- 操作按钮 -->
     <div class="ps" style="display:flex;flex-direction:column;gap:7px;">
@@ -574,7 +675,7 @@ tr:hover td{background:#f8fafc;}
   </section>
 </main>
 
-<!-- ═══ 修改读数弹窗 ═══ -->
+<!-- 修改读数弹窗 -->
 <div class="overlay" id="ovModify">
   <div class="modal">
     <div class="modal-title">✎ 修改读数</div>
@@ -586,7 +687,7 @@ tr:hover td{background:#f8fafc;}
   </div>
 </div>
 
-<!-- ═══ 历史记录弹窗（表格） ═══ -->
+<!-- 历史记录弹窗 -->
 <div class="overlay" id="ovHistory">
   <div class="modal hist-modal">
     <div class="modal-title">📊 历史识别记录</div>
@@ -602,7 +703,7 @@ tr:hover td{background:#f8fafc;}
   </div>
 </div>
 
-<!-- ═══ 摄像头拍摄弹窗 ═══ -->
+<!-- 摄像头弹窗 -->
 <div class="overlay" id="camOverlay">
   <div class="cam-modal">
 
@@ -637,10 +738,13 @@ tr:hover td{background:#f8fafc;}
   </div>
 </div>
 
+<!-- 二维码浮动卡片 -->
+<div class="qrcode-float qrcode-float-mini" id="qrcodeFloat" onclick="toggleQRCode()">
+  <span class="qr-icon">📱</span>
+</div>
+
 <script>
-// ══════════════════════════════════════════════
-//  全局状态
-// ══════════════════════════════════════════════
+// 全局变量
 let curTaskId=null, pollT=null, logT=null, done=false;
 let histCurPage=1, histTotal=0;
 
@@ -650,9 +754,7 @@ let chartSerial   = null;      // 当前图表对应的序号
 let showBefore    = true;      // 是否显示修正前
 let showAfter     = true;      // 是否显示修正后
 
-// ══════════════════════════════════════════════
-//  时钟
-// ══════════════════════════════════════════════
+// 时钟，每秒刷新一次
 function tick(){
   const n=new Date(),p=x=>String(x).padStart(2,'0');
   document.getElementById('sysT').textContent=
@@ -666,17 +768,27 @@ setInterval(tick,1000); tick();
   document.getElementById('uAvt').textContent=un.charAt(0).toUpperCase();
 })();
 
-// ══════════════════════════════════════════════
-//  图片上传
-// ══════════════════════════════════════════════
-function triggerUpload(){ document.getElementById('fileInput').click(); }
+// 强制清空四个图片显示区域（无论是否有图片，点击上传/拍摄按钮时立即执行）
+function clearAllImagePanels() {
+  ['imgOrig','imgObb','imgDial','imgFit'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.removeAttribute('src'); el.classList.remove('loaded'); }
+  });
+  // 恢复原始图片区域的占位符
+  const ph1 = document.getElementById('ph1');
+  if (ph1) ph1.style.display = '';
+}
+
+// 上传图片相关
+function triggerUpload(){ clearAllImagePanels(); document.getElementById('fileInput').click(); }
 document.getElementById('fileInput').addEventListener('change',e=>{ if(e.target.files[0])upload(e.target.files[0]); });
 const dz=document.getElementById('dropZone');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
-dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files[0])upload(e.dataTransfer.files[0]);});
+// dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files[0])upload(e.dataTransfer.files[0]);});
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files[0]){clearAllImagePanels();upload(e.dataTransfer.files[0]);}});
 dz.addEventListener('click',()=>{
-  // ★ 修复：摄像头弹窗打开期间屏蔽 dropZone 点击，防止误触发文件选择器
+  // 摄像头开着的时候不让点这块，不然会弹文件选择器
   if(document.getElementById('camOverlay').classList.contains('on')) return;
   if(!document.getElementById('imgOrig').classList.contains('loaded'))triggerUpload();
 });
@@ -699,9 +811,7 @@ async function upload(file){
   finally{ ld('ldOrig',0); }
 }
 
-// ══════════════════════════════════════════════
-//  检测
-// ══════════════════════════════════════════════
+// 开始检测
 async function startDetect(){
   if(!curTaskId)return;
   done=false; setStatus('running','检测中');
@@ -723,7 +833,7 @@ async function doPoll(){
   try{
     const r=await fetch(`/poll/${curTaskId}`);
     const d=await r.json();
-    // 更新日志
+    // 把最新日志塞进去
     if(d.logs&&d.logs.length){
       const le=document.getElementById('logArea');
       le.innerHTML=d.logs.map(l=>{
@@ -733,7 +843,7 @@ async function doPoll(){
         return`<div>${l}</div>`;
       }).join(''); le.scrollTop=le.scrollHeight;
     }
-    // 步进
+    // 根据日志条数更新进度条
     if(d.logs){
       const cnt=(d.logs.join('\n').match(/步骤 \d 完成/g)||[]).length;
       for(let i=1;i<=5;i++){
@@ -741,29 +851,29 @@ async function doPoll(){
         else if(i===cnt+1&&d.status==='running')setStep(i,'active');
       }
     }
-    // 图片
+    // 图片有了就显示
     if(d.img_obb){ ld('ldObb',0); showImg('imgObb',null,d.img_obb+'?t='+Date.now()); }
     if(d.img_dial){ ld('ldDial',0); showImg('imgDial',null,d.img_dial+'?t='+Date.now()); }
     if(d.img_fitting){
       const fitEl=document.getElementById('imgFit');
-      // ★ Fix: 只在图片尚未成功加载时才重新加载，避免中断重试
+      // 已经加载成功了就不要重复设src，会中断
       if(!fitEl.classList.contains('loaded')){
         ld('ldFit',0);
         showImg('imgFit',null,d.img_fitting+'?t='+Date.now());
       }
     }
-    // 完成
+    // 检测完成
     if(d.status==='done'&&!done){
       done=true; clearInterval(pollT);
       for(let i=1;i<=5;i++)setStep(i,'done');
       setStatus('done','已完成'); document.getElementById('btnDetect').disabled=false;
-      // ★ Fix: 补偿拟合图单次加载失败的情况
+      // 检测完了再确保一下拟合图加载了
       ensureFittingImg(d.img_fitting);
       if(d.detect_time){ document.getElementById('dtBadge').classList.add('on'); document.getElementById('dtText').textContent=d.detect_time; }
       if(d.serial_number) document.getElementById('snText').textContent=d.serial_number;
       if(d.reading_before!=null){ const e=document.getElementById('valB'); e.textContent=Number(d.reading_before).toFixed(6); e.classList.add('v'); }
       if(d.reading_after!=null){  const e=document.getElementById('valA'); e.textContent=Number(d.reading_after).toFixed(6);  e.classList.add('v'); }
-      // ★ 检测完成后，自动加载该序号的历史折线图
+      // 检测完了顺便把这个仪表的历史趋势图也刷出来
       if(d.serial_number){
         chartSerial=d.serial_number;
         document.getElementById('chartSerialText').textContent=d.serial_number;
@@ -775,9 +885,7 @@ async function doPoll(){
   }catch(e){ console.error(e); }
 }
 
-// ══════════════════════════════════════════════
-//  确认 / 修改
-// ══════════════════════════════════════════════
+// 确认和手动修改读数
 async function doConfirm(){
   const r=await fetch('/confirm',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({task_id:curTaskId})});
@@ -826,11 +934,9 @@ async function refreshLog(){
 }
 setInterval(refreshLog,1000); refreshLog();
 
-// ══════════════════════════════════════════════
-//  ★★★ 历史折线图 ★★★
-// ══════════════════════════════════════════════
+// 历史趋势图
 
-/* 切换显示系列 */
+// 切换折线显示
 function toggleSeries(which){
   if(which==='before'){
     showBefore=!showBefore;
@@ -850,12 +956,12 @@ function applySeriesVisibility(){
   histChart.update('none');
 }
 
-/* 刷新图表（手动刷新或 limit 改变） */
+// 手动刷新图表
 function reloadChart(){
   if(chartSerial) loadChartData(chartSerial);
 }
 
-/* 主加载函数 */
+// 加载图表数据
 async function loadChartData(serial){
   const limit=document.getElementById('limitSel').value;
   const ce=document.getElementById('chartEmpty');
@@ -883,7 +989,7 @@ async function loadChartData(serial){
   }
 }
 
-/* 渲染 / 更新 Chart.js */
+// 渲染图表，已有实例就复用（避免闪烁）
 function renderChart(records){
   const labels  = records.map(r=>formatChartLabel(r.detected_at));
   const bData   = records.map(r=>r.reading_before);
@@ -894,7 +1000,7 @@ function renderChart(records){
   const canvas=document.getElementById('histChart');
   const ctx=canvas.getContext('2d');
 
-  // 渐变填充（修正后读数）
+  // 区域渐变色
   const gradG=ctx.createLinearGradient(0,0,0,200);
   gradG.addColorStop(0,'rgba(5,150,105,.18)');
   gradG.addColorStop(1,'rgba(5,150,105,.01)');
@@ -1017,7 +1123,7 @@ function renderChart(records){
   };
 
   if(histChart){
-    // 复用实例，只更新数据（避免闪烁）
+    // 已经有图表了，直接更新数据就行，不要重新创建
     histChart.data.labels=labels;
     histChart.data.datasets[0].data=bData;
     histChart.data.datasets[0].taskIds=taskIds;
@@ -1037,15 +1143,15 @@ function destroyChart(){
   if(histChart){ histChart.destroy(); histChart=null; }
 }
 
-/* 格式化 x 轴日期标签（省略年份显示）*/
+// 把时间戳格式化成短一点的字符串，x轴显示
 function formatChartLabel(dtStr){
   if(!dtStr) return '—';
-  // "2025-06-20 14:30:00" → "06/20 14:30"
+  // "2025-06-20 14:30:00" => "06/20 14:30"
   const m=dtStr.match(/\d{4}-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
   return m ? `${m[1]}/${m[2]} ${m[3]}:${m[4]}` : dtStr.slice(5,16);
 }
 
-/* 更新统计摘要 */
+// 更新下面的统计数字
 function updateStats(records){
   const afterVals=records.map(r=>r.reading_after).filter(v=>v!=null);
   if(!afterVals.length){ clearStats(); return; }
@@ -1068,9 +1174,7 @@ function clearStats(){
   });
 }
 
-// ══════════════════════════════════════════════
-//  历史记录表格弹窗
-// ══════════════════════════════════════════════
+// 历史记录弹窗
 function openHistory(){ histCurPage=1; document.getElementById('ovHistory').classList.add('on'); loadHistory(); }
 function closeHistory(){ document.getElementById('ovHistory').classList.remove('on'); }
 function histPage(d){ const max=Math.max(1,Math.ceil(histTotal/20)); histCurPage=Math.max(1,Math.min(max,histCurPage+d)); loadHistory(); }
@@ -1098,10 +1202,8 @@ async function loadHistory(){
 }
 document.getElementById('ovHistory').addEventListener('click',e=>{ if(e.target===e.currentTarget)closeHistory(); });
 
-// ══════════════════════════════════════════════
-//  工具函数
-// ══════════════════════════════════════════════
-// ★ Fix: 带 onerror 重试的 showImg（最多 6 次，指数退避）
+// 工具函数
+// 图片加载，失败了自动重试，最多试6次
 function showImg(id, phId, url, retryCount = 0) {
   const MAX_RETRY = 6;
   const img = document.getElementById(id);
@@ -1113,19 +1215,19 @@ function showImg(id, phId, url, retryCount = 0) {
   img.onerror = () => {
     if (retryCount < MAX_RETRY) {
       const delay = 500 * Math.pow(2, retryCount);
-      console.warn(`[IMG] ${id} 加载失败，${delay}ms 后重试 (${retryCount+1}/${MAX_RETRY})`);
+      console.warn(`${id} 加载失败，${delay}ms 后重试 (${retryCount+1}/${MAX_RETRY})`);
       setTimeout(() => {
         showImg(id, phId, url.split('?')[0] + '?t=' + Date.now(), retryCount + 1);
       }, delay);
     } else {
-      console.error(`[IMG] ${id} 重试 ${MAX_RETRY} 次后仍失败：${url}`);
+      console.error(`${id} 重试 ${MAX_RETRY} 次后还是失败：${url}`);
     }
   };
   img.src = url;
   if (phId) { const ph = document.getElementById(phId); if (ph) ph.style.display = 'none'; }
 }
 
-// ★ Fix: 检测完成后强制确保拟合图已加载（补偿"单次轮询即失败"的时序问题）
+// 检测完成后再确认一下拟合图加载了没，有时候第一次poll回来图还没写好
 function ensureFittingImg(url) {
   if (!url) return;
   const imgEl = document.getElementById('imgFit');
@@ -1133,7 +1235,7 @@ function ensureFittingImg(url) {
   // 等 800ms 后检查，仍未加载则补偿重试
   setTimeout(() => {
     if (!imgEl.classList.contains('loaded')) {
-      console.log('[IMG] 拟合图未加载，补偿重试...');
+      console.log('拟合图还没加载，重试一次');
       ld('ldFit', 1);
       showImg('imgFit', null, url.split('?')[0] + '?t=' + Date.now(), 0);
       imgEl.addEventListener('load', () => ld('ldFit', 0), { once: true });
@@ -1155,8 +1257,30 @@ function appendLog(msg){
             msg.startsWith('▶')||msg.startsWith('🚀')||msg.startsWith('📁')?'log-i':'';
   e.innerHTML+=`<div ${cls?`class="${cls}"`:''}>${msg}</div>`; e.scrollTop=e.scrollHeight;
 }
+// function resetUI(){
+//   ['imgOrig','imgObb','imgDial','imgFit'].forEach(id=>{const e=document.getElementById(id);e.classList.remove('loaded');e.src='';});
+//   document.getElementById('ph1').style.display='';
+//   ['valB','valA'].forEach(id=>{const e=document.getElementById(id);e.textContent='—.——';e.classList.remove('v');});
+//   document.getElementById('dtText').textContent='——'; document.getElementById('dtBadge').classList.remove('on');
+//   document.getElementById('snText').textContent='表计序号待获取';
+//   document.getElementById('logArea').innerHTML='';
+//   document.getElementById('btnDetect').disabled=true;
+//   document.getElementById('tidText').textContent='——'; document.getElementById('tidBadge').style.borderColor='';
+//   setStatus('idle','待机'); resetSteps(); done=false;
+//   // 重置图表为空态
+//   destroyChart();
+//   document.getElementById('chartEmpty').classList.remove('hidden');
+//   document.getElementById('chartEmpty').querySelector('div:last-child').textContent='检测完成后自动加载历史趋势';
+//   clearStats();
+//   chartSerial=null;
+//   document.getElementById('chartSerialText').textContent='请先完成检测';
+// }
 function resetUI(){
-  ['imgOrig','imgObb','imgDial','imgFit'].forEach(id=>{const e=document.getElementById(id);e.classList.remove('loaded');e.src='';});
+  ['imgOrig','imgObb','imgDial','imgFit'].forEach(id=>{
+    const e=document.getElementById(id);
+    e.classList.remove('loaded');
+    e.removeAttribute('src'); 
+  });
   document.getElementById('ph1').style.display='';
   ['valB','valA'].forEach(id=>{const e=document.getElementById(id);e.textContent='—.——';e.classList.remove('v');});
   document.getElementById('dtText').textContent='——'; document.getElementById('dtBadge').classList.remove('on');
@@ -1175,25 +1299,23 @@ function resetUI(){
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModify(); closeHistory(); } });
 
-// ══════════════════════════════════════════════
-//  ★★★ 实时拍摄 — 摄像头模块 ★★★
-// ══════════════════════════════════════════════
+// 摄像头模块
 
 let camStream      = null;   // 当前 MediaStream
 let camFacingMode  = null;   // 当前摄像头方向
 let camCaptured    = null;   // 拍摄的 base64 字符串
 let camHasMultiple = false;  // 是否有多个摄像头（用于切换按钮）
 
-// ── 打开摄像头弹窗 ──────────────────────────────
+// 打开摄像头弹窗
 async function openCamera() {
-
-  // ★ 修复：提前检测安全上下文。
-  //   浏览器只在 HTTPS 或 localhost 下开放 navigator.mediaDevices，
-  //   通过局域网 IP + HTTP 访问时该对象为 undefined，直接崩溃。
+  // 点击"实时拍摄"按钮时，立即强制清空四个图片区域
+  clearAllImagePanels();
+  // 先判断能不能用摄像头
+  // 非https/localhost下mediaDevices是undefined，直接调会崩
   if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
     const onPhone = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (onPhone) {
-      // 手机降级：用带 capture 属性的 input 直接唤起系统相机，无需 HTTPS
+      // 手机没法用getUserMedia的时候用input[capture]代替，可以直接调系统相机
       const inp = document.createElement('input');
       inp.type = 'file'; inp.accept = 'image/*'; inp.capture = 'environment';
       inp.addEventListener('change', e => { if(e.target.files[0]) upload(e.target.files[0]); });
@@ -1217,7 +1339,7 @@ async function openCamera() {
   document.getElementById('camError').classList.remove('show');
   document.getElementById('camHint').textContent = '摄像头初始化中...';
 
-  // 检测是否有多个摄像头（移动端通常有前后两个）
+  // 看看有没有多个摄像头，有的话才显示切换按钮
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
     const videoDevices = devices.filter(d => d.kind === 'videoinput');
@@ -1226,24 +1348,24 @@ async function openCamera() {
     document.getElementById('camSwitchBtn').disabled = !camHasMultiple;
   } catch(_) {}
 
-  // 移动端优先使用后置摄像头，PC 使用前置
+  // 手机默认后置，电脑默认前置（一般只有一个）
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   camFacingMode = isMobile ? 'environment' : 'user';
 
   await startStream(camFacingMode);
 }
 
-// ── 启动视频流 ──────────────────────────────────
+// 启动摄像头流
 async function startStream(facingMode) {
-  stopStream();  // 先停掉旧流
+  stopStream();  // 先把旧流停掉再开新的
 
-  // 重置为取景状态
+  // 重置UI为取景器状态
   resetToViewfinder();
 
-  // ★ 安全网：双重检查（openCamera 已拦截一次，此处防止外部直接调用）
+  // openCamera那边已经判断过一次了，这里再判断一下防止被直接调用
   if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
     document.getElementById('camHint').textContent = '摄像头不可用';
-    showCamError('⚠ 当前环境不支持摄像头 API，请改用 HTTPS 或 http://127.0.0.1:5000 访问。');
+    showCamError('⚠ 当前环境不支持摄像头 API，请改用 HTTPS 访问。');
     return;
   }
 
@@ -1295,7 +1417,7 @@ async function startStream(facingMode) {
   }
 }
 
-// ── 停止视频流 ──────────────────────────────────
+// 停止摄像头
 function stopStream() {
   if (camStream) {
     camStream.getTracks().forEach(t => t.stop());
@@ -1305,14 +1427,14 @@ function stopStream() {
   video.srcObject = null;
 }
 
-// ── 切换前后摄像头 ──────────────────────────────
+// 前后摄像头切换
 async function switchCamera() {
   if (!camHasMultiple) return;
   const next = camFacingMode === 'environment' ? 'user' : 'environment';
   await startStream(next);
 }
 
-// ── 拍摄快门 ────────────────────────────────────
+// 拍照
 function capturePhoto() {
   const video = document.getElementById('camVideo');
   if (!camStream || video.readyState < 2) {
@@ -1320,36 +1442,36 @@ function capturePhoto() {
     return;
   }
 
-  // 闪光效果
+  // 模拟闪光动画
   const flash = document.getElementById('camFlash');
   flash.classList.remove('flash');
   void flash.offsetWidth;  // 强制重排触发动画
   flash.classList.add('flash');
 
-  // 将当前帧绘制到 canvas
+  // 把当前帧画到canvas上
   const canvas = document.getElementById('camCanvas');
   canvas.width  = video.videoWidth  || 1280;
   canvas.height = video.videoHeight || 960;
   const ctx = canvas.getContext('2d');
 
-  // 前置摄像头水平镜像（更符合自拍习惯）
+  // 前置摄像头镜像一下，不然是反的
   if (camFacingMode === 'user') {
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
   }
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  // 获取 base64（JPEG，质量 0.92）
+  // 转成base64，质量0.92够用了
   camCaptured = canvas.toDataURL('image/jpeg', 0.92);
 
-  // 显示预览
+  // 切换到预览状态
   const preview = document.getElementById('camPreview');
   preview.src = camCaptured;
   preview.classList.add('show');
   document.getElementById('camVideo').classList.add('hide');
   document.getElementById('camCrosshair').style.display = 'none';
 
-  // 切换底部按钮
+  // 换成确认/重拍按钮
   document.getElementById('camShutter').style.display = 'none';
   document.getElementById('camConfirmBtn').classList.add('show');
   document.getElementById('camSwitchBtn').onclick = retakePhoto;
@@ -1358,15 +1480,15 @@ function capturePhoto() {
   document.getElementById('camTitle').textContent = '📷 预览 — 确认使用？';
 }
 
-// ── 重新拍摄 ────────────────────────────────────
+// 重拍
 function retakePhoto() {
   camCaptured = null;
   resetToViewfinder();
-  // 继续使用当前摄像头流
+  // 流还在就不用重新申请权限
   if (!camStream) startStream(camFacingMode);
 }
 
-// ── 重置为取景状态 ──────────────────────────────
+// 重置回取景器状态（拍完或重拍时用）
 function resetToViewfinder() {
   document.getElementById('camVideo').classList.remove('hide');
   document.getElementById('camPreview').classList.remove('show');
@@ -1381,7 +1503,7 @@ function resetToViewfinder() {
   camCaptured = null;
 }
 
-// ── 确认使用拍摄图片 ────────────────────────────
+// 确认用这张图，上传到服务器
 async function usePhoto() {
   if (!camCaptured) return;
 
@@ -1408,7 +1530,7 @@ async function usePhoto() {
     // 关闭摄像头弹窗
     closeCamera();
 
-    // 与 upload() 函数相同的后续处理
+    // 后续逻辑和上传文件一样
     resetUI();
     curTaskId = data.task_id;
     showImg('imgOrig', 'ph1', data.image_url);
@@ -1425,7 +1547,7 @@ async function usePhoto() {
   }
 }
 
-// ── 关闭摄像头弹窗 ──────────────────────────────
+// 关闭摄像头
 function closeCamera() {
   stopStream();
   resetToViewfinder();
@@ -1436,17 +1558,106 @@ function closeCamera() {
   document.getElementById('camConfirmBtn').textContent = '✔ 使用此图片';
 }
 
-// ── 显示/隐藏错误提示 ───────────────────────────
+// 显示/隐藏错误信息
 function showCamError(msg) {
   const el = document.getElementById('camError');
   if (msg) { el.textContent = msg; el.classList.add('show'); }
   else      { el.classList.remove('show'); }
 }
 
-// ESC 关闭摄像头
+// 按ESC也可以关
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (document.getElementById('camOverlay').classList.contains('on')) closeCamera();
+  }
+});
+
+// 二维码功能
+let qrcodeExpanded = false;
+
+// 切换二维码显示状态
+function toggleQRCode() {
+  const qrFloat = document.getElementById('qrcodeFloat');
+  qrcodeExpanded = !qrcodeExpanded;
+  
+  if (qrcodeExpanded) {
+    // 展开二维码
+    qrFloat.classList.remove('qrcode-float-mini');
+    qrFloat.innerHTML = `
+      <div class="qrcode-header">
+        <span class="qrcode-title" id="qrcodeTitle">📱 扫码体验</span>
+        <button class="qrcode-close" onclick="toggleQRCode();event.stopPropagation();">✕</button>
+      </div>
+      <div class="qrcode-img-wrapper">
+        <img class="qrcode-img" id="qrcodeImage" src="/api/qrcode" alt="二维码"/>
+      </div>
+      <div style="text-align:center;">
+        <div class="qrcode-desc" id="qrcodeDesc">扫描二维码获取移动端应用</div>
+        <div class="qrcode-type" id="qrcodeType">📲 移动应用</div>
+      </div>
+    `;
+    // 加载二维码信息
+    loadQRCodeInfo();
+  } else {
+    // 收起二维码
+    qrFloat.classList.add('qrcode-float-mini');
+    qrFloat.innerHTML = '<span class="qr-icon">📱</span>';
+  }
+}
+
+// 加载二维码信息
+async function loadQRCodeInfo() {
+  try {
+    const response = await fetch('/api/qrcode/info');
+    if (response.ok) {
+      const info = await response.json();
+      const titleEl = document.getElementById('qrcodeTitle');
+      const descEl = document.getElementById('qrcodeDesc');
+      const typeEl = document.getElementById('qrcodeType');
+      
+      if (titleEl) {
+        titleEl.textContent = info.type === 'wechat' ? '📱 扫码打开小程序' : '📲 扫码下载APP';
+      }
+      if (descEl) {
+        descEl.textContent = info.description;
+      }
+      if (typeEl) {
+        typeEl.textContent = info.type === 'wechat' ? '🔗 微信小程序' : '📥 Android APK';
+      }
+    }
+  } catch(e) {
+    console.log('加载二维码信息失败:', e);
+  }
+}
+
+// 新增：全局监听“原始图片”变化，自动清空结果区域
+document.addEventListener('DOMContentLoaded', () => {
+  const imgOrigNode = document.getElementById('imgOrig');
+  
+  if (imgOrigNode) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        // 只要检测到 src 属性发生了改变
+        if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+          const newSrc = imgOrigNode.getAttribute('src');
+          
+          // 如果赋予了新的有效图片路径
+          if (newSrc) {
+            // 强制清空：带标签表盘、裁剪表盘、拟合结果
+            ['imgObb', 'imgDial', 'imgFit'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) {
+                el.removeAttribute('src'); // 移除 src，避免浏览器产生对空路径的额外网络请求
+                el.classList.remove('loaded'); // 移除 loaded 类，触发 CSS 的 display: none
+              }
+            });
+          }
+        }
+      });
+    });
+    
+    // 启动监听，专门观察 attributes（属性）的变化
+    observer.observe(imgOrigNode, { attributes: true });
   }
 });
 
